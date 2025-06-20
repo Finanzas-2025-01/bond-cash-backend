@@ -1,10 +1,13 @@
 package nrg.inc.koutape.iam.domain.model.aggregates;
 
+import io.micrometer.common.lang.Nullable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import nrg.inc.koutape.bonds.domain.model.aggregates.BondHolder;
+import nrg.inc.koutape.bonds.domain.model.aggregates.Investor;
 import nrg.inc.koutape.iam.domain.model.entities.Role;
 import nrg.inc.koutape.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 
@@ -46,6 +49,18 @@ public class User extends AuditableAbstractAggregateRoot<User> {
       joinColumns = @JoinColumn(name = "user_id"),
       inverseJoinColumns = @JoinColumn(name = "role_id"))
   private Set<Role> roles;
+
+  @Nullable
+  @Setter
+  @OneToOne
+  @JoinColumn(name = "bond_holder_id")
+  private BondHolder bondHolder;
+
+  @Nullable
+  @Setter
+  @OneToOne
+  @JoinColumn(name = "investor_id")
+  private Investor investor;
 
   public User() {
     this.roles = new HashSet<>();

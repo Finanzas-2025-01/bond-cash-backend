@@ -76,7 +76,13 @@ public class UserCommandServiceImpl implements UserCommandService {
             roleRepository.findByName(role.getName())
                 .orElseThrow(() -> new RuntimeException("Role name not found")))
         .toList();
-    var user = new User(command.username(), hashingService.encode(command.password()), roles);
+    var user = new User(
+            command.username(),
+            command.name(),
+            command.surname(),
+            command.email(),
+            hashingService.encode(command.password()),
+            roles);
     userRepository.save(user);
     return userRepository.findByUsername(command.username());
   }

@@ -6,10 +6,7 @@ import nrg.inc.koutape.iam.interfaces.rest.resources.AuthenticatedUserResource;
 import nrg.inc.koutape.iam.interfaces.rest.resources.SignInResource;
 import nrg.inc.koutape.iam.interfaces.rest.resources.SignUpResource;
 import nrg.inc.koutape.iam.interfaces.rest.resources.UserResource;
-import nrg.inc.koutape.iam.interfaces.rest.transform.AuthenticatedUserResourceFromEntityAssembler;
-import nrg.inc.koutape.iam.interfaces.rest.transform.SignInCommandFromResourceAssembler;
-import nrg.inc.koutape.iam.interfaces.rest.transform.SignUpCommandFromResourceAssembler;
-import nrg.inc.koutape.iam.interfaces.rest.transform.UserResourceFromEntityAssembler;
+import nrg.inc.koutape.iam.interfaces.rest.transform.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -74,6 +71,22 @@ public class AuthenticationController {
     var user = userCommandService.handle(signUpCommand);
     if (user.isEmpty()) {
       return ResponseEntity.badRequest().build();
+    }
+
+    var role = user.get().getRoles().stream().findFirst().get().getName().toString();
+
+    if (role.equals("ROLE_INVESTOR")) {
+      var createUserInvestorCommand = CreateUserInvestorCommandFromResourceAssembler.toCommandFromResource(user.get().getId());
+      user = userCommandService.handle(createUserInvestorCommand);
+      if (user.isEmpty()) {
+        return ResponseEntity.badRequest().build();
+      }
+    } else if (role.equals("ROLE_BONDHOLDER")) {
+      var createUserBondHolderCommand = CreateUserBondHolderCommandFromResourceAssembler.toCommandFromResource(user.get().getId());
+        user = userCommandService.handle(createUserBondHolderCommand);
+        if (user.isEmpty()) {
+          return ResponseEntity.badRequest().build();
+        }
     }
     var userResource = UserResourceFromEntityAssembler.toResourceFromEntity(user.get());
     return new ResponseEntity<>(userResource, HttpStatus.CREATED);

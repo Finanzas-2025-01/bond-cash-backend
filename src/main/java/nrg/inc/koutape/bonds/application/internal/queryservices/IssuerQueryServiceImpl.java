@@ -1,21 +1,27 @@
 package nrg.inc.koutape.bonds.application.internal.queryservices;
 
+import nrg.inc.koutape.bonds.domain.model.aggregates.Bond;
 import nrg.inc.koutape.bonds.domain.model.aggregates.Issuer;
+import nrg.inc.koutape.bonds.domain.model.queries.GetAllBondsByIssuerIdQuery;
 import nrg.inc.koutape.bonds.domain.model.queries.GetIssuerByUsernameQuery;
 import nrg.inc.koutape.bonds.domain.services.IssuerQueryService;
+import nrg.inc.koutape.bonds.infrastructure.persistence.jpa.repositories.IssuerRepository;
 import nrg.inc.koutape.iam.domain.model.queries.GetUserByUsernameQuery;
 import nrg.inc.koutape.iam.domain.services.UserQueryService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class IssuerQueryServiceImpl implements IssuerQueryService {
 
     private final UserQueryService userQueryService;
+    private final IssuerRepository issuerRepository;
 
-    public IssuerQueryServiceImpl(UserQueryService userQueryService) {
+    public IssuerQueryServiceImpl(UserQueryService userQueryService, IssuerRepository issuerRepository) {
         this.userQueryService = userQueryService;
+        this.issuerRepository = issuerRepository;
     }
 
     @Override
@@ -31,5 +37,14 @@ public class IssuerQueryServiceImpl implements IssuerQueryService {
             return Optional.of(issuer);
         }
         return Optional.empty();
+    }
+
+    @Override
+    public List<Bond> handle(GetAllBondsByIssuerIdQuery query) {
+        var issuer = issuerRepository.findById(query.issuerId());
+        if (issuer.isPresent()) {
+            return issuer.get().getBonds();
+        }
+        return List.of();
     }
 }

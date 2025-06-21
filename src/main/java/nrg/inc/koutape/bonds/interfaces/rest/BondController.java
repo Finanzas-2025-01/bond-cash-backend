@@ -2,8 +2,6 @@ package nrg.inc.koutape.bonds.interfaces.rest;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import nrg.inc.koutape.bonds.domain.model.aggregates.Bond;
-import nrg.inc.koutape.bonds.domain.model.commands.CreateBondCommand;
 import nrg.inc.koutape.bonds.domain.model.commands.HireBondCommand;
 import nrg.inc.koutape.bonds.domain.model.queries.GetBondByIdQuery;
 import nrg.inc.koutape.bonds.domain.model.queries.GetBondHolderByUsernameQuery;
@@ -18,7 +16,6 @@ import nrg.inc.koutape.bonds.interfaces.rest.resources.HiredBondResource;
 import nrg.inc.koutape.bonds.interfaces.rest.transform.BondResourceFromEntityAssembler;
 import nrg.inc.koutape.bonds.interfaces.rest.transform.CreateBondCommandFromResourceAssembler;
 import nrg.inc.koutape.bonds.interfaces.rest.transform.HiredBondResourceFromEntityAssembler;
-import nrg.inc.koutape.iam.domain.services.UserQueryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

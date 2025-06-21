@@ -44,17 +44,17 @@ public class Bond extends AuditableAbstractAggregateRoot<Bond> {
 
     private Date issueDate;
 
-    private Double percentagePremium;
+    private Double premiumPercentage;
 
-    private Double percentageStructuring;
+    private Double structuringPercentage;
 
-    private Double percentagePlacement;
+    private Double placementPercentage;
 
-    private Double percentageFloatingRate;
+    private Double floatingRatePercentage;
 
-    private Double percentageCAVALI;
+    private Double CAVALIPercentage;
 
-    private Double percentageAnualInflation;
+    private Double anualInflationPercentage;
 
     @OneToMany(mappedBy = "bond", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CashFlow> cashFlows;

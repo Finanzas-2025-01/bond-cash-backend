@@ -9,9 +9,9 @@ import nrg.inc.koutape.bonds.interfaces.rest.resources.CreateBondResource;
 import java.util.Date;
 
 public class CreateBondCommandFromResourceAssembler {
-    public static CreateBondCommand toCommandFromResource(CreateBondResource command, Long bondId) {
+    public static CreateBondCommand toCommandFromResource(CreateBondResource command, Long issuerId) {
         return new CreateBondCommand(
-                bondId,
+                issuerId,
                 command.name(),
                 command.nominalValue(),
                 command.comercialValue(),

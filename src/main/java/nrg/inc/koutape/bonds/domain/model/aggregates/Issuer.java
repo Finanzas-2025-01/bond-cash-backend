@@ -20,7 +20,7 @@ import java.util.List;
 @Getter
 public class Issuer extends AuditableAbstractAggregateRoot<Issuer> {
 
-    @OneToMany(mappedBy = "bondHolder")
+    @OneToMany(mappedBy = "issuer")
     private List<Bond> bonds;
 
     @OneToOne(mappedBy = "issuer")

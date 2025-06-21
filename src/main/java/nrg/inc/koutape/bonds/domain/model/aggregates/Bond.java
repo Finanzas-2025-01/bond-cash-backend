@@ -13,7 +13,7 @@ import java.util.List;
 public class Bond extends AuditableAbstractAggregateRoot<Bond> {
 
     @ManyToOne
-    @JoinColumn(name = "bond_holder_id")
+    @JoinColumn(name = "issuer_id")
     private Issuer issuer;
 
     @ManyToMany(mappedBy = "bonds")

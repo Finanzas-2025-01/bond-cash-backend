@@ -19,8 +19,8 @@ import java.util.List;
 public class BondHolder extends AuditableAbstractAggregateRoot<BondHolder> {
     @ManyToMany
     @JoinTable(
-            name = "investor_bonds",
-            joinColumns = @JoinColumn(name = "investor_id"),
+            name = "bond_holder_bonds",
+            joinColumns = @JoinColumn(name = "bond_holder_id"),
             inverseJoinColumns = @JoinColumn(name = "bond_id")
     )
     private List<Bond> bonds;

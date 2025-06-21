@@ -35,13 +35,11 @@ public class BondCommandServiceImpl implements BondCommandService {
             throw new IllegalArgumentException("Bond with id " + command.bondId() + " does not exist");
         }
 
-        bond.get().addBondHolder(bondHolder.get());
         bondHolder.get().addBond(bond.get());
 
         try{
             this.bondHolderRepository.save(bondHolder.get());
-            var updatedBond = this.bondRepository.save(bond.get());
-            return Optional.of(updatedBond);
+            return Optional.of(bond.get());
         } catch (Exception e) {
             throw new RuntimeException("Failed to hire bond: " + e.getMessage(), e);
         }

@@ -54,6 +54,11 @@ public class Bond extends AuditableAbstractAggregateRoot<Bond> {
 
     private Double percentageCAVALI;
 
+    private Double percentageAnualInflation;
+
+    @OneToMany(mappedBy = "bond", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CashFlow> cashFlows;
+
     public Bond() {
         // Default constructor
     }

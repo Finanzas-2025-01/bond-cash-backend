@@ -1,11 +1,12 @@
 package nrg.inc.koutape.bonds.domain.model.aggregates;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
+import nrg.inc.koutape.bonds.domain.model.valueobjects.Capitalization;
+import nrg.inc.koutape.bonds.domain.model.valueobjects.CuponFrequency;
+import nrg.inc.koutape.bonds.domain.model.valueobjects.InterestRateType;
 import nrg.inc.koutape.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -17,6 +18,41 @@ public class Bond extends AuditableAbstractAggregateRoot<Bond> {
 
     @ManyToMany(mappedBy = "bonds")
     private List<Investor> investors;
+
+    private String name;
+
+    private Double nominalValue;
+
+    private Double comercialValue;
+
+    private Integer years;
+
+    @Enumerated(EnumType.STRING)
+    private CuponFrequency cuponFrequency;
+
+    @Enumerated(EnumType.STRING)
+    private InterestRateType interestRateType;
+
+    @Enumerated(EnumType.STRING)
+    private Capitalization capitalization;
+
+    private Double interestRatePercentage;
+
+    private Double anualDiscountRatePercentage;
+
+    private Double incomeTaxPercentage;
+
+    private Date issueDate;
+
+    private Double percentagePremium;
+
+    private Double percentageStructuring;
+
+    private Double percentagePlacement;
+
+    private Double percentageFloatingRate;
+
+    private Double percentageCAVALI;
 
     public Bond() {
         // Default constructor

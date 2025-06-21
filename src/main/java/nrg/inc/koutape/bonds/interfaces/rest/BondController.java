@@ -5,10 +5,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import nrg.inc.koutape.bonds.domain.model.aggregates.Bond;
 import nrg.inc.koutape.bonds.domain.model.commands.CreateBondCommand;
 import nrg.inc.koutape.bonds.domain.model.commands.HireBondCommand;
+import nrg.inc.koutape.bonds.domain.model.queries.GetBondByIdQuery;
 import nrg.inc.koutape.bonds.domain.model.queries.GetBondHolderByUsernameQuery;
 import nrg.inc.koutape.bonds.domain.model.queries.GetIssuerByUsernameQuery;
 import nrg.inc.koutape.bonds.domain.services.BondCommandService;
 import nrg.inc.koutape.bonds.domain.services.BondHolderQueryService;
+import nrg.inc.koutape.bonds.domain.services.BondQueryService;
 import nrg.inc.koutape.bonds.domain.services.IssuerQueryService;
 import nrg.inc.koutape.bonds.interfaces.rest.resources.BondResource;
 import nrg.inc.koutape.bonds.interfaces.rest.resources.CreateBondResource;
@@ -28,10 +30,12 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Bond", description = "Bond management API")
 public class BondController {
     private final BondCommandService bondCommandService;
+    private final BondQueryService bondQueryService;
     private final BondHolderQueryService bondHolderQueryService;
     private final IssuerQueryService issuerQueryService;
-    public BondController(BondCommandService bondCommandService, BondHolderQueryService bondHolderQueryService, IssuerQueryService issuerQueryService) {
+    public BondController(BondCommandService bondCommandService, BondQueryService bondQueryService, BondHolderQueryService bondHolderQueryService, IssuerQueryService issuerQueryService) {
         this.bondCommandService = bondCommandService;
+        this.bondQueryService = bondQueryService;
         this.bondHolderQueryService = bondHolderQueryService;
         this.issuerQueryService = issuerQueryService;
     }
@@ -71,5 +75,17 @@ public class BondController {
         }
         var hiredBondResource = HiredBondResourceFromEntityAssembler.toResourceFromEntity(bond.get(), bondHolder.get());
         return ResponseEntity.ok(hiredBondResource);
+    }
+
+    @GetMapping("/{bondId}")
+    @Operation(summary = "Get bond by ID", description = "Retrieve a bond by its ID")
+    public ResponseEntity<BondResource> getBondById(@PathVariable Long bondId) {
+        var getBondByIdQuery = new GetBondByIdQuery(bondId);
+        var bond = bondQueryService.handle(getBondByIdQuery);
+        if (bond.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        var bondResource = BondResourceFromEntityAssembler.toResourceFromEntity(bond.get());
+        return ResponseEntity.ok(bondResource);
     }
 }

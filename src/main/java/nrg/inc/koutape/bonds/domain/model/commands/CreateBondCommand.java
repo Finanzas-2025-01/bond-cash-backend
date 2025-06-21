@@ -9,7 +9,7 @@ import nrg.inc.koutape.bonds.domain.model.valueobjects.InterestRateType;
 import java.util.Date;
 
 public record CreateBondCommand(
-       Long bondHolderId,
+       Long issuerId,
        String name,
        Double nominalValue,
        Double comercialValue,

@@ -35,4 +35,8 @@ public class BondHolder extends AuditableAbstractAggregateRoot<BondHolder> {
     public BondHolder() {
 
     }
+
+    public void addBond(Bond bond) {
+        this.bonds.add(bond);
+    }
 }

@@ -1,6 +1,9 @@
 package nrg.inc.koutape.bonds.domain.model.aggregates;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import nrg.inc.koutape.bonds.domain.model.commands.CreateBondCommand;
 import nrg.inc.koutape.bonds.domain.model.valueobjects.Capitalization;
 import nrg.inc.koutape.bonds.domain.model.valueobjects.CuponFrequency;
 import nrg.inc.koutape.bonds.domain.model.valueobjects.InterestRateType;
@@ -9,6 +12,8 @@ import nrg.inc.koutape.shared.domain.model.aggregates.AuditableAbstractAggregate
 import java.util.Date;
 import java.util.List;
 
+@Getter
+@Setter
 @Entity
 public class Bond extends AuditableAbstractAggregateRoot<Bond> {
 
@@ -66,5 +71,28 @@ public class Bond extends AuditableAbstractAggregateRoot<Bond> {
         // Default constructor
     }
 
-    // Additional methods can be added here
+    public Bond(CreateBondCommand command) {
+        this.name = command.name();
+        this.nominalValue = command.nominalValue();
+        this.comercialValue = command.comercialValue();
+        this.years = command.years();
+        this.cuponFrequency = command.cuponFrequency();
+        this.interestRateType = command.interestRateType();
+        this.capitalization = command.capitalization();
+        this.interestRatePercentage = command.interestRatePercentage();
+        this.anualDiscountRatePercentage = command.anualDiscountRatePercentage();
+        this.incomeTaxPercentage = command.incomeTaxPercentage();
+        this.issueDate = command.issueDate();
+        this.premiumPercentage = command.premiumPercentage();
+        this.structuringPercentage = command.structuringPercentage();
+        this.placementPercentage = command.placementPercentage();
+        this.floatingRatePercentage = command.floatingRatePercentage();
+        this.CAVALIPercentage = command.CAVALIPercentage();
+        this.anualInflationPercentage = command.anualInflationPercentage();
+    }
+
+    public void addBondHolder(BondHolder bondHolder) {
+        this.bondholders.add(bondHolder);
+        bondHolder.getBonds().add(this);
+    }
 }

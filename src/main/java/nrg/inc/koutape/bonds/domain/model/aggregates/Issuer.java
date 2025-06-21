@@ -33,4 +33,8 @@ public class Issuer extends AuditableAbstractAggregateRoot<Issuer> {
     public Issuer() {
 
     }
+
+    public void addBond(Bond bond) {
+        this.bonds.add(bond);
+    }
 }

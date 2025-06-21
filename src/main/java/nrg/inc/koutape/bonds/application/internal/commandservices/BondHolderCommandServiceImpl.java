@@ -11,16 +11,16 @@ import java.util.Optional;
 @Service
 public class BondHolderCommandServiceImpl implements BondHolderCommandService {
 
-    private final BondHolderRepository bondHolderRepository;
+    private final BondHolderRepository investorRepository;
 
-    public BondHolderCommandServiceImpl(BondHolderRepository bondHolderRepository) {
-        this.bondHolderRepository = bondHolderRepository;
+    public BondHolderCommandServiceImpl(BondHolderRepository investorRepository) {
+        this.investorRepository = investorRepository;
     }
 
     @Override
-    public Optional<BondHolder> handle(CreateBondHolderCommand createBondCommand) {
-        var bondHolder = new BondHolder(createBondCommand);
-        var savedBondHolder = bondHolderRepository.save(bondHolder);
-        return Optional.of(savedBondHolder);
+    public Optional<BondHolder> handle(CreateBondHolderCommand command) {
+        var investor = new BondHolder(command);
+        var createdInvestor = investorRepository.save(investor);
+        return Optional.of(createdInvestor);
     }
 }

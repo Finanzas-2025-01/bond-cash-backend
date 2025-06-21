@@ -6,8 +6,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import nrg.inc.koutape.bonds.domain.model.aggregates.Issuer;
 import nrg.inc.koutape.bonds.domain.model.aggregates.BondHolder;
-import nrg.inc.koutape.bonds.domain.model.aggregates.Investor;
 import nrg.inc.koutape.iam.domain.model.entities.Role;
 import nrg.inc.koutape.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 
@@ -53,14 +53,14 @@ public class User extends AuditableAbstractAggregateRoot<User> {
   @Nullable
   @Setter
   @OneToOne
-  @JoinColumn(name = "bond_holder_id")
-  private BondHolder bondHolder;
+  @JoinColumn(name = "issuer_id")
+  private Issuer issuer;
 
   @Nullable
   @Setter
   @OneToOne
-  @JoinColumn(name = "investor_id")
-  private Investor investor;
+  @JoinColumn(name = "bond_holder_id")
+  private BondHolder bondHolder;
 
   public User() {
     this.roles = new HashSet<>();

@@ -1,14 +1,14 @@
 package nrg.inc.koutape.iam.application.internal.commandservices;
 
+import nrg.inc.koutape.bonds.domain.model.commands.CreateIssuerCommand;
 import nrg.inc.koutape.bonds.domain.model.commands.CreateBondHolderCommand;
-import nrg.inc.koutape.bonds.domain.model.commands.CreateInvestorCommand;
+import nrg.inc.koutape.bonds.domain.services.IssuerCommandService;
 import nrg.inc.koutape.bonds.domain.services.BondHolderCommandService;
-import nrg.inc.koutape.bonds.domain.services.InvestorCommandService;
 import nrg.inc.koutape.iam.application.internal.outboundservices.hashing.HashingService;
 import nrg.inc.koutape.iam.application.internal.outboundservices.tokens.TokenService;
 import nrg.inc.koutape.iam.domain.model.aggregates.User;
+import nrg.inc.koutape.iam.domain.model.commands.CreateUserIssuerCommand;
 import nrg.inc.koutape.iam.domain.model.commands.CreateUserBondHolderCommand;
-import nrg.inc.koutape.iam.domain.model.commands.CreateUserInvestorCommand;
 import nrg.inc.koutape.iam.domain.model.commands.SignInCommand;
 import nrg.inc.koutape.iam.domain.model.commands.SignUpCommand;
 import nrg.inc.koutape.iam.domain.services.UserCommandService;
@@ -32,12 +32,12 @@ public class UserCommandServiceImpl implements UserCommandService {
   private final UserRepository userRepository;
   private final HashingService hashingService;
   private final TokenService tokenService;
-  private final InvestorCommandService investorCommandService;
-  private final BondHolderCommandService bondHolderCommandService;
+  private final BondHolderCommandService investorCommandService;
+  private final IssuerCommandService bondHolderCommandService;
   private final RoleRepository roleRepository;
 
   public UserCommandServiceImpl(UserRepository userRepository, HashingService hashingService,
-                                TokenService tokenService, InvestorCommandService investorCommandService, BondHolderCommandService bondHolderCommandService, RoleRepository roleRepository) {
+                                TokenService tokenService, BondHolderCommandService investorCommandService, IssuerCommandService bondHolderCommandService, RoleRepository roleRepository) {
 
     this.userRepository = userRepository;
     this.hashingService = hashingService;
@@ -97,17 +97,17 @@ public class UserCommandServiceImpl implements UserCommandService {
   }
 
   @Override
-  public Optional<User> handle(CreateUserInvestorCommand command) {
+  public Optional<User> handle(CreateUserBondHolderCommand command) {
     var userId = command.userId();
     if (userRepository.findById(userId).isEmpty()) {
       throw new RuntimeException("User not found");
     }
     var user = userRepository.findById(userId).get();
-    var investor = investorCommandService.handle(new CreateInvestorCommand());
+    var investor = investorCommandService.handle(new CreateBondHolderCommand());
     if (investor.isEmpty()) {
-      throw new RuntimeException("Investor creation failed");
+      throw new RuntimeException("Bond holder creation failed");
     }
-    user.setInvestor(investor.get());
+    user.setBondHolder(investor.get());
     investor.get().setUser(user);
     try{
      var savedUser = userRepository.save(user);
@@ -118,17 +118,17 @@ public class UserCommandServiceImpl implements UserCommandService {
   }
 
   @Override
-  public Optional<User> handle(CreateUserBondHolderCommand command) {
+  public Optional<User> handle(CreateUserIssuerCommand command) {
     var userId = command.userId();
     if (userRepository.findById(userId).isEmpty()) {
       throw new RuntimeException("User not found");
     }
     var user = userRepository.findById(userId).get();
-    var bondHolder = bondHolderCommandService.handle(new CreateBondHolderCommand());
+    var bondHolder = bondHolderCommandService.handle(new CreateIssuerCommand());
     if (bondHolder.isEmpty()) {
-      throw new RuntimeException("Bond holder creation failed");
+      throw new RuntimeException("Issuer creation failed");
     }
-    user.setBondHolder(bondHolder.get());
+    user.setIssuer(bondHolder.get());
     bondHolder.get().setUser(user);
     try {
       var savedUser = userRepository.save(user);

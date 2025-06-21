@@ -14,10 +14,10 @@ public class Bond extends AuditableAbstractAggregateRoot<Bond> {
 
     @ManyToOne
     @JoinColumn(name = "bond_holder_id")
-    private BondHolder bondHolder;
+    private Issuer issuer;
 
     @ManyToMany(mappedBy = "bonds")
-    private List<Investor> investors;
+    private List<BondHolder> bondholders;
 
     private String name;
 

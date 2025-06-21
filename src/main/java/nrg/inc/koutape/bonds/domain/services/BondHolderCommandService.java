@@ -6,5 +6,5 @@ import nrg.inc.koutape.bonds.domain.model.commands.CreateBondHolderCommand;
 import java.util.Optional;
 
 public interface BondHolderCommandService {
-    Optional<BondHolder> handle(CreateBondHolderCommand createBondCommand);
+    Optional<BondHolder> handle(CreateBondHolderCommand createInvestorCommand);
 }

@@ -75,14 +75,14 @@ public class AuthenticationController {
 
     var role = user.get().getRoles().stream().findFirst().get().getName().toString();
 
-    if (role.equals("ROLE_INVESTOR")) {
-      var createUserInvestorCommand = CreateUserInvestorCommandFromResourceAssembler.toCommandFromResource(user.get().getId());
+    if (role.equals("ROLE_BONDHOLDER")) {
+      var createUserInvestorCommand = CreateUserBondHolderCommandFromResourceAssembler.toCommandFromResource(user.get().getId());
       user = userCommandService.handle(createUserInvestorCommand);
       if (user.isEmpty()) {
         return ResponseEntity.badRequest().build();
       }
-    } else if (role.equals("ROLE_BONDHOLDER")) {
-      var createUserBondHolderCommand = CreateUserBondHolderCommandFromResourceAssembler.toCommandFromResource(user.get().getId());
+    } else if (role.equals("ROLE_ISSUER")) {
+      var createUserBondHolderCommand = CreateUserIssuerCommandFromResourceAssembler.toCommandFromResource(user.get().getId());
         user = userCommandService.handle(createUserBondHolderCommand);
         if (user.isEmpty()) {
           return ResponseEntity.badRequest().build();

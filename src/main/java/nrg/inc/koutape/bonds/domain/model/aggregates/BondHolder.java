@@ -1,8 +1,6 @@
 package nrg.inc.koutape.bonds.domain.model.aggregates;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import nrg.inc.koutape.bonds.domain.model.commands.CreateBondHolderCommand;
@@ -12,22 +10,26 @@ import nrg.inc.koutape.shared.domain.model.aggregates.AuditableAbstractAggregate
 import java.util.List;
 
 /**
- * Represents a bond holder in the bond system. Este es el emisor de bonos.
- * A bond holder can hold multiple bonds and is associated with a user.
+ * Represents an investor in the bond system. Este es el bonista.
+ * An investor can hold multiple bonds and is associated with a user.
  */
 @Entity
 @Setter
 @Getter
 public class BondHolder extends AuditableAbstractAggregateRoot<BondHolder> {
-
-    @OneToMany(mappedBy = "bondHolder")
+    @ManyToMany
+    @JoinTable(
+            name = "investor_bonds",
+            joinColumns = @JoinColumn(name = "investor_id"),
+            inverseJoinColumns = @JoinColumn(name = "bond_id")
+    )
     private List<Bond> bonds;
 
     @OneToOne(mappedBy = "bondHolder")
     private User user;
 
     public BondHolder(CreateBondHolderCommand command) {
-        // Initialize the BondHolder with the command data
+        // Initialize the investor with the command data
     }
 
     public BondHolder() {

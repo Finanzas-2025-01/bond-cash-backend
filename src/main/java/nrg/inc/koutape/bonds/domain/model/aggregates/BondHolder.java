@@ -11,6 +11,10 @@ import nrg.inc.koutape.shared.domain.model.aggregates.AuditableAbstractAggregate
 
 import java.util.List;
 
+/**
+ * Represents a bond holder in the bond system. Este es el emisor de bonos.
+ * A bond holder can hold multiple bonds and is associated with a user.
+ */
 @Entity
 @Setter
 @Getter

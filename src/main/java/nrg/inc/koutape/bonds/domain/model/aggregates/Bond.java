@@ -59,6 +59,9 @@ public class Bond extends AuditableAbstractAggregateRoot<Bond> {
     @OneToMany(mappedBy = "bond", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CashFlow> cashFlows;
 
+    @OneToOne(mappedBy = "bond", cascade = CascadeType.ALL, orphanRemoval = true)
+    private BondResult bondResult;
+
     public Bond() {
         // Default constructor
     }

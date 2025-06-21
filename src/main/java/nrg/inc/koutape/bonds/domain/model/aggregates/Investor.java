@@ -9,6 +9,10 @@ import nrg.inc.koutape.shared.domain.model.aggregates.AuditableAbstractAggregate
 
 import java.util.List;
 
+/**
+ * Represents an investor in the bond system. Este es el bonista.
+ * An investor can hold multiple bonds and is associated with a user.
+ */
 @Entity
 @Setter
 @Getter

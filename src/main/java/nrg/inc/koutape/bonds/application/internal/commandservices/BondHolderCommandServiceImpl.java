@@ -19,8 +19,8 @@ public class BondHolderCommandServiceImpl implements BondHolderCommandService {
 
     @Override
     public Optional<BondHolder> handle(CreateBondHolderCommand command) {
-        var investor = new BondHolder(command);
-        var createdInvestor = investorRepository.save(investor);
-        return Optional.of(createdInvestor);
+        var bondHolder = new BondHolder(command);
+        var createdBondHolder= investorRepository.save(bondHolder);
+        return Optional.of(createdBondHolder);
     }
 }

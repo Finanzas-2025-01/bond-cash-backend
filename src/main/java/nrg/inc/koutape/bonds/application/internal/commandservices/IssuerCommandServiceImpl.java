@@ -18,9 +18,9 @@ public class IssuerCommandServiceImpl implements IssuerCommandService {
     }
 
     @Override
-    public Optional<Issuer> handle(CreateIssuerCommand createBondCommand) {
-        var bondHolder = new Issuer(createBondCommand);
-        var savedBondHolder = bondHolderRepository.save(bondHolder);
-        return Optional.of(savedBondHolder);
+    public Optional<Issuer> handle(CreateIssuerCommand command) {
+        var issuer = new Issuer(command);
+        var savedIssuer = bondHolderRepository.save(issuer);
+        return Optional.of(savedIssuer);
     }
 }

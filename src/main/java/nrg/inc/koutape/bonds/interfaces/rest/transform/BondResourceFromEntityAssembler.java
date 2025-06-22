@@ -18,6 +18,7 @@ public class BondResourceFromEntityAssembler {
                 bond.getComercialValue(),
                 bond.getYears(),
                 bond.getCuponFrequency(),
+                bond.getDaysPerYear(),
                 bond.getInterestRateType(),
                 bond.getCapitalization(),
                 bond.getInterestRatePercentage(),

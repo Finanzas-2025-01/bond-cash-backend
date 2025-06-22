@@ -13,6 +13,7 @@ public record BondResource(
         Double comercialValue,
         Integer years,
         CuponFrequency cuponFrequency,
+        Integer daysPerYear,
         InterestRateType interestRateType,
         Capitalization capitalization,
         Double interestRatePercentage,

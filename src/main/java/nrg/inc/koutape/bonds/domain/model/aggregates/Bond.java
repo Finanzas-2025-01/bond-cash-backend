@@ -35,6 +35,8 @@ public class Bond extends AuditableAbstractAggregateRoot<Bond> {
     @Enumerated(EnumType.STRING)
     private CuponFrequency cuponFrequency;
 
+    private Integer daysPerYear = 360; // Default value, can be adjusted based on the context
+
     @Enumerated(EnumType.STRING)
     private InterestRateType interestRateType;
 
@@ -77,6 +79,7 @@ public class Bond extends AuditableAbstractAggregateRoot<Bond> {
         this.comercialValue = command.comercialValue();
         this.years = command.years();
         this.cuponFrequency = command.cuponFrequency();
+        this.daysPerYear = command.daysPerYear();
         this.interestRateType = command.interestRateType();
         this.capitalization = command.capitalization();
         this.interestRatePercentage = command.interestRatePercentage();
@@ -91,8 +94,34 @@ public class Bond extends AuditableAbstractAggregateRoot<Bond> {
         this.anualInflationPercentage = command.anualInflationPercentage();
     }
 
-    public void addBondHolder(BondHolder bondHolder) {
-        this.bondholders.add(bondHolder);
-        bondHolder.getBonds().add(this);
+    public void generateCashFlows(){
+        var cuponFrequencyValue = 0;
+        switch (this.cuponFrequency) {
+            case MONTHLY -> cuponFrequencyValue = 30;
+            case BIMONTHLY -> cuponFrequencyValue = 60;
+            case TRIMESTRAL -> cuponFrequencyValue = 90;
+            case QUADRIMONTHLY -> cuponFrequencyValue = 120;
+            case SEMIANNUAL -> cuponFrequencyValue = 180;
+            case ANNUAL -> cuponFrequencyValue = 360;
+        }
+        var capitalizationDays = 0;
+        switch (this.capitalization) {
+            case NONE -> capitalizationDays = 0;
+            case DAILY -> capitalizationDays = 1;
+            case BIWEEKLY -> capitalizationDays = 15;
+            case MONTHLY -> capitalizationDays = 30;
+            case BIMONTHLY -> capitalizationDays = 60;
+            case TRIMONTHLY -> capitalizationDays = 90;
+            case QUADRIMONTHLY -> capitalizationDays = 120;
+            case SEMIANNUAL -> capitalizationDays = 180;
+            case ANNUAL -> capitalizationDays = 360;
+        }
+        var periodsPerYear = this.daysPerYear/ cuponFrequencyValue;
+        var totalPeriods = 0;
+        var effectiveAnualRate = 0.0;
+        var effectivePeriodRate = 0.0;
+        var periodCOK = 0.0;
+        var initialIssuerCosts = 0.0;
+        var initialBondHolderCosts = 0.0;
     }
 }

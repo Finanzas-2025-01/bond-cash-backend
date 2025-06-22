@@ -17,6 +17,7 @@ public class CreateBondCommandFromResourceAssembler {
                 command.comercialValue(),
                 command.years(),
                 command.cuponFrequency(),
+                command.daysPerYear(),
                 command.interestRateType(),
                 command.capitalization(),
                 command.interestRatePercentage(),

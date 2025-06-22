@@ -47,6 +47,9 @@ public class BondCommandServiceImpl implements BondCommandService {
 
     @Override
     public Optional<Bond> handle(CreateBondCommand command) {
+        if (command.daysPerYear() != 360 && command.daysPerYear() != 365) {
+            throw new IllegalArgumentException("Days per year must be either 360 or 365");
+        }
         var bond = new Bond(command);
         var issuer = this.issuerRepository.findById(command.issuerId());
         if (issuer.isEmpty()) {

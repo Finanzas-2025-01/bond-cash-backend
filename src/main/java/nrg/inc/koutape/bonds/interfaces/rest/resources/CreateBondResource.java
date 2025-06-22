@@ -12,6 +12,7 @@ public record CreateBondResource(
         Double comercialValue,
         Integer years,
         CuponFrequency cuponFrequency,
+        Integer daysPerYear,
         InterestRateType interestRateType,
         Capitalization capitalization,
         Double interestRatePercentage,

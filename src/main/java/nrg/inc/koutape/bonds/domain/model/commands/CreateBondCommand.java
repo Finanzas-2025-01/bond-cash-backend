@@ -15,6 +15,7 @@ public record CreateBondCommand(
        Double comercialValue,
        Integer years,
        CuponFrequency cuponFrequency,
+       Integer daysPerYear,
        InterestRateType interestRateType,
        Capitalization capitalization,
        Double interestRatePercentage,

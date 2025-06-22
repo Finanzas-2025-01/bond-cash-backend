@@ -2,6 +2,7 @@ package nrg.inc.koutape.bonds.application.internal.commandservices;
 
 import nrg.inc.koutape.bonds.domain.model.aggregates.Bond;
 import nrg.inc.koutape.bonds.domain.model.commands.CreateBondCommand;
+import nrg.inc.koutape.bonds.domain.model.commands.GenerateCashFlowsByBondIdCommand;
 import nrg.inc.koutape.bonds.domain.model.commands.HireBondCommand;
 import nrg.inc.koutape.bonds.domain.services.BondCommandService;
 import nrg.inc.koutape.bonds.infrastructure.persistence.jpa.repositories.BondHolderRepository;
@@ -63,5 +64,20 @@ public class BondCommandServiceImpl implements BondCommandService {
         var createdBond = bondRepository.save(bond);
 
         return Optional.of(createdBond);
+    }
+
+    @Override
+    public void handle(GenerateCashFlowsByBondIdCommand command) {
+        var bond = this.bondRepository.findById(command.bondId());
+        if (bond.isEmpty()) {
+            throw new IllegalArgumentException("Bond with id " + command.bondId() + " does not exist");
+        }
+
+        try {
+            bond.get().generateCashFlows();
+            this.bondRepository.save(bond.get());
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to generate cash flows for bond: " + e.getMessage(), e);
+        }
     }
 }

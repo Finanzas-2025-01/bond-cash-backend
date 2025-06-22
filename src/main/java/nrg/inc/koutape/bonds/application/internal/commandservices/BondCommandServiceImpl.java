@@ -7,6 +7,7 @@ import nrg.inc.koutape.bonds.domain.model.commands.HireBondCommand;
 import nrg.inc.koutape.bonds.domain.services.BondCommandService;
 import nrg.inc.koutape.bonds.infrastructure.persistence.jpa.repositories.BondHolderRepository;
 import nrg.inc.koutape.bonds.infrastructure.persistence.jpa.repositories.BondRepository;
+import nrg.inc.koutape.bonds.infrastructure.persistence.jpa.repositories.CashFlowRepository;
 import nrg.inc.koutape.bonds.infrastructure.persistence.jpa.repositories.IssuerRepository;
 import org.springframework.stereotype.Service;
 
@@ -18,11 +19,13 @@ public class BondCommandServiceImpl implements BondCommandService {
     private final BondHolderRepository bondHolderRepository;
     private final BondRepository bondRepository;
     private final IssuerRepository issuerRepository;
+    private final CashFlowRepository cashFlowRepository;
 
-    public BondCommandServiceImpl(BondHolderRepository bondHolderRepository, BondRepository bondRepository, IssuerRepository issuerRepository) {
+    public BondCommandServiceImpl(BondHolderRepository bondHolderRepository, BondRepository bondRepository, IssuerRepository issuerRepository, CashFlowRepository cashFlowRepository) {
         this.bondHolderRepository = bondHolderRepository;
         this.bondRepository = bondRepository;
         this.issuerRepository = issuerRepository;
+        this.cashFlowRepository = cashFlowRepository;
     }
 
     @Override
@@ -71,6 +74,14 @@ public class BondCommandServiceImpl implements BondCommandService {
         var bond = this.bondRepository.findById(command.bondId());
         if (bond.isEmpty()) {
             throw new IllegalArgumentException("Bond with id " + command.bondId() + " does not exist");
+        }
+
+        if (bond.get().getCashFlows() != null && !bond.get().getCashFlows().isEmpty()) {
+            var cashFlows = this.cashFlowRepository.findByBondId(command.bondId());
+            for (var cashFlow : cashFlows) {
+                this.cashFlowRepository.delete(cashFlow);
+            }
+            bond.get().getCashFlows().clear();
         }
 
         try {

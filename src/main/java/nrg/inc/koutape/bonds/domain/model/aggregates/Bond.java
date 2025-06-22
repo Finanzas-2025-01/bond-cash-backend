@@ -123,13 +123,13 @@ public class Bond extends AuditableAbstractAggregateRoot<Bond> {
         var effectiveAnualRate = 0.0;
         switch (this.interestRateType) {
             case EFFECTIVE -> effectiveAnualRate = this.interestRatePercentage/100;
-            case NOMINAL -> effectiveAnualRate = (Math.pow(1 + (this.interestRatePercentage/(this.daysPerYear/capitalizationDays)), this.daysPerYear/capitalizationDays) - 1)/100;
+            case NOMINAL -> effectiveAnualRate = (Math.pow(1 + (this.interestRatePercentage/( (double)this.daysPerYear/capitalizationDays)), (double)this.daysPerYear/capitalizationDays) - 1)/100;
         }
-        var effectivePeriodRate = (Math.pow((1+effectiveAnualRate),cuponFrequencyValue/this.daysPerYear))/100;
-        var periodCOK = (Math.pow((1+this.anualDiscountRatePercentage/100),cuponFrequencyValue/this.daysPerYear))/100;
+        var effectivePeriodRate = (Math.pow((1+effectiveAnualRate), (double)cuponFrequencyValue/this.daysPerYear))/100;
+        var periodCOK = (Math.pow((1+this.anualDiscountRatePercentage/100), (double)cuponFrequencyValue/this.daysPerYear))/100;
         var initialIssuerCosts = ((this.structuringPercentage+this.placementPercentage+this.floatingRatePercentage+this.CAVALIPercentage)/100) * this.comercialValue;
         var initialBondHolderCosts = ((this.floatingRatePercentage+this.CAVALIPercentage)/100) * this.comercialValue;
-        for (int i = 0; i < totalPeriods; i++) {
+        for (int i = 0; i <= totalPeriods; i++) {
             var cashFlow = new CashFlow();
             cashFlow.setBond(this);
             cashFlow.setPeriodNumber(i);
@@ -151,8 +151,10 @@ public class Bond extends AuditableAbstractAggregateRoot<Bond> {
                 cashFlow.setAnualInflation(this.anualInflationPercentage/100);
 
                 // Set the period inflation based on the cupon frequency
-                var cashFlowAnualInflation = cashFlow.getAnualInflation();
-                var periodInflation = Math.pow(1 + cashFlowAnualInflation,(cuponFrequencyValue/this.daysPerYear))-1;
+                var cashFlowAnualInflation = this.anualInflationPercentage/100;
+                System.out.println("Anual Inflation: " + cashFlowAnualInflation + " for period: " + i);
+                var periodInflation = Math.pow(1 + cashFlowAnualInflation,( (double) cuponFrequencyValue/this.daysPerYear))-1;
+                System.out.println("Period Inflation: " + periodInflation + " for period: " + i);
                 cashFlow.setPeriodInflation(periodInflation);
 
                 // Set the cupon grace period

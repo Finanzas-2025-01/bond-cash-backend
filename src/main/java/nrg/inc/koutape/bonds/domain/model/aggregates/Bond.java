@@ -6,9 +6,11 @@ import lombok.Setter;
 import nrg.inc.koutape.bonds.domain.model.commands.CreateBondCommand;
 import nrg.inc.koutape.bonds.domain.model.valueobjects.Capitalization;
 import nrg.inc.koutape.bonds.domain.model.valueobjects.CuponFrequency;
+import nrg.inc.koutape.bonds.domain.model.valueobjects.GracePeriod;
 import nrg.inc.koutape.bonds.domain.model.valueobjects.InterestRateType;
 import nrg.inc.koutape.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -117,11 +119,46 @@ public class Bond extends AuditableAbstractAggregateRoot<Bond> {
             case ANNUAL -> capitalizationDays = 360;
         }
         var periodsPerYear = this.daysPerYear/ cuponFrequencyValue;
-        var totalPeriods = 0;
+        var totalPeriods = this.years * periodsPerYear;
         var effectiveAnualRate = 0.0;
-        var effectivePeriodRate = 0.0;
-        var periodCOK = 0.0;
-        var initialIssuerCosts = 0.0;
-        var initialBondHolderCosts = 0.0;
+        switch (this.interestRateType) {
+            case EFFECTIVE -> effectiveAnualRate = this.interestRatePercentage/100;
+            case NOMINAL -> effectiveAnualRate = (Math.pow(1 + (this.interestRatePercentage/(this.daysPerYear/capitalizationDays)), this.daysPerYear/capitalizationDays) - 1)/100;
+        }
+        var effectivePeriodRate = (Math.pow((1+effectiveAnualRate),cuponFrequencyValue/this.daysPerYear))/100;
+        var periodCOK = (Math.pow((1+this.anualDiscountRatePercentage/100),cuponFrequencyValue/this.daysPerYear))/100;
+        var initialIssuerCosts = ((this.structuringPercentage+this.placementPercentage+this.floatingRatePercentage+this.CAVALIPercentage)/100) * this.comercialValue;
+        var initialBondHolderCosts = ((this.floatingRatePercentage+this.CAVALIPercentage)/100) * this.comercialValue;
+        for (int i = 0; i < totalPeriods; i++) {
+            var cashFlow = new CashFlow();
+            cashFlow.setBond(this);
+            cashFlow.setPeriodNumber(i);
+            if(i == 0){
+                cashFlow.setAssignedDate(this.issueDate);
+                cashFlow.setIssuerFlow(this.comercialValue - initialIssuerCosts);
+                cashFlow.setIssuerFlowWithShield(this.comercialValue - initialIssuerCosts);
+                cashFlow.setBondHolderFlow(-this.comercialValue + initialBondHolderCosts);
+            }else {
+                // Calculate the assigned date based on the previous cash flow's assigned date and the cupon frequency
+                var previousAssignedDate = this.cashFlows.get(i - 1).getAssignedDate();
+                var calendar = Calendar.getInstance();
+                calendar.setTime(previousAssignedDate);
+                calendar.add(Calendar.DAY_OF_YEAR, cuponFrequencyValue);
+                var assignedDate = calendar.getTime();
+                cashFlow.setAssignedDate(assignedDate);
+
+                // Set the annual inflation
+                cashFlow.setAnualInflation(this.anualInflationPercentage/100);
+
+                // Set the period inflation based on the cupon frequency
+                var cashFlowAnualInflation = cashFlow.getAnualInflation();
+                var periodInflation = Math.pow(1 + cashFlowAnualInflation,(cuponFrequencyValue/this.daysPerYear))-1;
+                cashFlow.setPeriodInflation(periodInflation);
+
+                // Set the cupon grace period
+                cashFlow.setGracePeriod(GracePeriod.S);
+            }
+            cashFlows.add(cashFlow);
+        }
     }
 }

@@ -2,19 +2,19 @@ package nrg.inc.koutape.bonds.interfaces.rest;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import nrg.inc.koutape.bonds.domain.model.commands.GenerateCashFlowsByBondIdCommand;
 import nrg.inc.koutape.bonds.domain.model.commands.HireBondCommand;
-import nrg.inc.koutape.bonds.domain.model.queries.GetAllBondsQuery;
-import nrg.inc.koutape.bonds.domain.model.queries.GetBondByIdQuery;
-import nrg.inc.koutape.bonds.domain.model.queries.GetBondHolderByUsernameQuery;
-import nrg.inc.koutape.bonds.domain.model.queries.GetIssuerByUsernameQuery;
+import nrg.inc.koutape.bonds.domain.model.queries.*;
 import nrg.inc.koutape.bonds.domain.services.BondCommandService;
 import nrg.inc.koutape.bonds.domain.services.BondHolderQueryService;
 import nrg.inc.koutape.bonds.domain.services.BondQueryService;
 import nrg.inc.koutape.bonds.domain.services.IssuerQueryService;
 import nrg.inc.koutape.bonds.interfaces.rest.resources.BondResource;
+import nrg.inc.koutape.bonds.interfaces.rest.resources.CashFlowResource;
 import nrg.inc.koutape.bonds.interfaces.rest.resources.CreateBondResource;
 import nrg.inc.koutape.bonds.interfaces.rest.resources.HiredBondResource;
 import nrg.inc.koutape.bonds.interfaces.rest.transform.BondResourceFromEntityAssembler;
+import nrg.inc.koutape.bonds.interfaces.rest.transform.CashFlowResourceFromEntityAssembler;
 import nrg.inc.koutape.bonds.interfaces.rest.transform.CreateBondCommandFromResourceAssembler;
 import nrg.inc.koutape.bonds.interfaces.rest.transform.HiredBondResourceFromEntityAssembler;
 import org.springframework.http.HttpStatus;
@@ -59,7 +59,7 @@ public class BondController {
         return new ResponseEntity<>(bondResource, HttpStatus.CREATED);
     }
 
-    @PutMapping(value = "/{bondId}/hire/")
+    @PutMapping(value = "/{bondId}/hire")
     @Operation(summary = "Hire a bond", description = "Hire a bond by bondId and bondHolderId")
     public ResponseEntity<HiredBondResource> hireBond(@PathVariable Long bondId, @AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
@@ -97,5 +97,24 @@ public class BondController {
                 .map(BondResourceFromEntityAssembler::toResourceFromEntity)
                 .toList();
         return ResponseEntity.ok(bondResources);
+    }
+
+    @GetMapping("/{bondId}/cashFlows")
+    @Operation(summary = "Get cash flows by bond ID", description = "Retrieve cash flows for a specific bond by its ID")
+    public ResponseEntity<List<CashFlowResource>> getCashFlowsByBondId(@PathVariable Long bondId) {
+        var bond = bondQueryService.handle(new GetBondByIdQuery(bondId));
+        if (bond.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        var generateCashFlowsCommand = new GenerateCashFlowsByBondIdCommand(bondId);
+        bondCommandService.handle(generateCashFlowsCommand);
+
+        var cashFlows = bondQueryService.handle(new GetCashFlowsByBondIdQuery(bondId));
+
+        var cashFlowResources = cashFlows.stream()
+                .map(CashFlowResourceFromEntityAssembler::toResourceFromEntity)
+                .toList();
+        return ResponseEntity.ok(cashFlowResources);
     }
 }

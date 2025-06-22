@@ -137,7 +137,7 @@ public class Bond extends AuditableAbstractAggregateRoot<Bond> {
                 cashFlow.setAssignedDate(this.issueDate);
                 cashFlow.setIssuerFlow(this.comercialValue - initialIssuerCosts);
                 cashFlow.setIssuerFlowWithShield(this.comercialValue - initialIssuerCosts);
-                cashFlow.setBondHolderFlow(-this.comercialValue + initialBondHolderCosts);
+                cashFlow.setBondHolderFlow(-this.comercialValue - initialBondHolderCosts);
             }else {
                 // Calculate the assigned date based on the previous cash flow's assigned date and the cupon frequency
                 var previousAssignedDate = this.cashFlows.get(i - 1).getAssignedDate();

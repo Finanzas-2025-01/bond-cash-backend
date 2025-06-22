@@ -3,6 +3,7 @@ package nrg.inc.koutape.bonds.interfaces.rest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import nrg.inc.koutape.bonds.domain.model.commands.HireBondCommand;
+import nrg.inc.koutape.bonds.domain.model.queries.GetAllBondsQuery;
 import nrg.inc.koutape.bonds.domain.model.queries.GetBondByIdQuery;
 import nrg.inc.koutape.bonds.domain.model.queries.GetBondHolderByUsernameQuery;
 import nrg.inc.koutape.bonds.domain.model.queries.GetIssuerByUsernameQuery;
@@ -21,6 +22,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "/api/v1/bonds")
@@ -84,5 +87,15 @@ public class BondController {
         }
         var bondResource = BondResourceFromEntityAssembler.toResourceFromEntity(bond.get());
         return ResponseEntity.ok(bondResource);
+    }
+
+    @GetMapping
+    @Operation(summary = "Get all bonds", description = "Retrieve all bonds")
+    public ResponseEntity<List<BondResource>> getAllBonds() {
+        var bonds = bondQueryService.handle(new GetAllBondsQuery());
+        var bondResources = bonds.stream()
+                .map(BondResourceFromEntityAssembler::toResourceFromEntity)
+                .toList();
+        return ResponseEntity.ok(bondResources);
     }
 }

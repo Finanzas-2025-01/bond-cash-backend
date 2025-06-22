@@ -12,45 +12,50 @@ import java.util.Date;
 @Setter
 @Getter
 public class CashFlow extends AuditableAbstractAggregateRoot<CashFlow> {
+
     @ManyToOne
     @JoinColumn(name = "bond_id")
     private Bond bond;
 
-    private Integer periodNumber;
+    private Integer periodNumber = 0;
 
-    private Date assignedDate;
+    private Date assignedDate = new Date();
 
-    private Double anualInflation;
+    private Double anualInflation = 0.0;
 
-    private Double periodInflation;
+    private Double periodInflation = 0.0;
 
     @Enumerated(EnumType.STRING)
-    private GracePeriod gracePeriod;
+    private GracePeriod gracePeriod = GracePeriod.S;
 
-    private Double bondValue;
+    private Double bondValue = 0.0;
 
-    private Double indexedBondValue;
+    private Double indexedBondValue = 0.0;
 
-    private Double cupon;
+    private Double cupon = 0.0;
 
-    private Double payment;
+    private Double payment = 0.0;
 
-    private Double amortization;
+    private Double amortization = 0.0;
 
-    private Double premium;
+    private Double premium = 0.0;
 
-    private Double shield;
+    private Double shield = 0.0;
 
-    private Double issuerFlow;
+    private Double issuerFlow = 0.0;
 
-    private Double issuerFlowWithShield;
+    private Double issuerFlowWithShield = 0.0;
 
-    private Double bondHolderFlow;
+    private Double bondHolderFlow = 0.0;
 
-    private Double updatedFlow;
+    private Double updatedFlow = 0.0;
 
-    private Double FAxPeriod;
+    private Double FAxPeriod = 0.0;
 
-    private Double pFactor;
+    private Double pFactor = 0.0;
+
+    public CashFlow() {
+
+    }
 
 }

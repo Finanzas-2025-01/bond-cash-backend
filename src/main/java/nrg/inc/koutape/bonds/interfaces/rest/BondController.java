@@ -126,7 +126,7 @@ public class BondController {
         return ResponseEntity.ok(cashFlowResources);
     }
 
-    @PutMapping(value = "/{bondId}/cashFlows/{periodNumber}/gracePeriod")
+    @PatchMapping(value = "/{bondId}/cashFlows/{periodNumber}/gracePeriod")
     @Operation(summary = "Update grace period by period number and bond ID", description = "Update the grace period for a specific cash flow period of a bond")
     public ResponseEntity<Void> updateGracePeriodByPeriodNumberAndBondId(
             @PathVariable Long bondId,

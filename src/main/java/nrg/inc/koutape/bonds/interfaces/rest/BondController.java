@@ -4,7 +4,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import nrg.inc.koutape.bonds.domain.model.commands.GenerateCashFlowsByBondIdCommand;
 import nrg.inc.koutape.bonds.domain.model.commands.HireBondCommand;
+import nrg.inc.koutape.bonds.domain.model.commands.UpdateGracePeriodByPeriodNumberAndBondIdCommand;
 import nrg.inc.koutape.bonds.domain.model.queries.*;
+import nrg.inc.koutape.bonds.domain.model.valueobjects.GracePeriod;
 import nrg.inc.koutape.bonds.domain.services.BondCommandService;
 import nrg.inc.koutape.bonds.domain.services.BondHolderQueryService;
 import nrg.inc.koutape.bonds.domain.services.BondQueryService;
@@ -51,6 +53,10 @@ public class BondController {
         var issuerId = issuer.get().getId();
         var createdBond = CreateBondCommandFromResourceAssembler.toCommandFromResource(createBondResource,issuerId);
         var bond = bondCommandService.handle(createdBond);
+
+        var generateCashFlowsCommand = new GenerateCashFlowsByBondIdCommand(bond.get().getId());
+        bondCommandService.handle(generateCashFlowsCommand);
+
         if (bond.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
@@ -107,8 +113,10 @@ public class BondController {
             return ResponseEntity.notFound().build();
         }
 
+        /*
         var generateCashFlowsCommand = new GenerateCashFlowsByBondIdCommand(bondId);
         bondCommandService.handle(generateCashFlowsCommand);
+        */
 
         var cashFlows = bondQueryService.handle(new GetCashFlowsByBondIdQuery(bondId));
 
@@ -116,5 +124,18 @@ public class BondController {
                 .map(CashFlowResourceFromEntityAssembler::toResourceFromEntity)
                 .toList();
         return ResponseEntity.ok(cashFlowResources);
+    }
+
+    @PutMapping(value = "/{bondId}/cashFlows/{periodNumber}/gracePeriod")
+    @Operation(summary = "Update grace period by period number and bond ID", description = "Update the grace period for a specific cash flow period of a bond")
+    public ResponseEntity<Void> updateGracePeriodByPeriodNumberAndBondId(
+            @PathVariable Long bondId,
+            @PathVariable Integer periodNumber,
+            @RequestBody GracePeriod gracePeriod) {
+        var command = new UpdateGracePeriodByPeriodNumberAndBondIdCommand(bondId, periodNumber, gracePeriod);
+        bondCommandService.handle(command);
+        var generateCashFlowsCommand = new GenerateCashFlowsByBondIdCommand(bondId);
+        bondCommandService.handle(generateCashFlowsCommand);
+        return ResponseEntity.noContent().build();
     }
 }

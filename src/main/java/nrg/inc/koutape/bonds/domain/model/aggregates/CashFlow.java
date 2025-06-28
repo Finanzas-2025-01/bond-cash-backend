@@ -26,7 +26,7 @@ public class CashFlow extends AuditableAbstractAggregateRoot<CashFlow> {
     private Double periodInflation = 0.0;
 
     @Enumerated(EnumType.STRING)
-    private GracePeriod gracePeriod = GracePeriod.S;
+    private GracePeriod gracePeriod = GracePeriod.N;
 
     private Double bondValue = 0.0;
 

@@ -1,9 +1,11 @@
 package nrg.inc.koutape.bonds.application.internal.queryservices;
 
 import nrg.inc.koutape.bonds.domain.model.aggregates.Bond;
+import nrg.inc.koutape.bonds.domain.model.aggregates.BondHolder;
 import nrg.inc.koutape.bonds.domain.model.aggregates.CashFlow;
 import nrg.inc.koutape.bonds.domain.model.queries.GetAllBondsQuery;
 import nrg.inc.koutape.bonds.domain.model.queries.GetBondByIdQuery;
+import nrg.inc.koutape.bonds.domain.model.queries.GetBondHoldersByBondIdQuery;
 import nrg.inc.koutape.bonds.domain.model.queries.GetCashFlowsByBondIdQuery;
 import nrg.inc.koutape.bonds.domain.services.BondQueryService;
 import nrg.inc.koutape.bonds.infrastructure.persistence.jpa.repositories.BondRepository;
@@ -34,5 +36,11 @@ public class BondQueryServiceImpl implements BondQueryService {
     public List<CashFlow> handle(GetCashFlowsByBondIdQuery query) {
         var bond = this.bondRepository.findById(query.bondId());
         return bond.get().getCashFlows();
+    }
+
+    @Override
+    public List<BondHolder> handle(GetBondHoldersByBondIdQuery query) {
+        var bond = this.bondRepository.findById(query.bondId());
+        return bond.get().getBondholders();
     }
 }

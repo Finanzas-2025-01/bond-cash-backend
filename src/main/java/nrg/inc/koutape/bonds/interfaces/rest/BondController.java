@@ -11,14 +11,8 @@ import nrg.inc.koutape.bonds.domain.services.BondCommandService;
 import nrg.inc.koutape.bonds.domain.services.BondHolderQueryService;
 import nrg.inc.koutape.bonds.domain.services.BondQueryService;
 import nrg.inc.koutape.bonds.domain.services.IssuerQueryService;
-import nrg.inc.koutape.bonds.interfaces.rest.resources.BondResource;
-import nrg.inc.koutape.bonds.interfaces.rest.resources.CashFlowResource;
-import nrg.inc.koutape.bonds.interfaces.rest.resources.CreateBondResource;
-import nrg.inc.koutape.bonds.interfaces.rest.resources.HiredBondResource;
-import nrg.inc.koutape.bonds.interfaces.rest.transform.BondResourceFromEntityAssembler;
-import nrg.inc.koutape.bonds.interfaces.rest.transform.CashFlowResourceFromEntityAssembler;
-import nrg.inc.koutape.bonds.interfaces.rest.transform.CreateBondCommandFromResourceAssembler;
-import nrg.inc.koutape.bonds.interfaces.rest.transform.HiredBondResourceFromEntityAssembler;
+import nrg.inc.koutape.bonds.interfaces.rest.resources.*;
+import nrg.inc.koutape.bonds.interfaces.rest.transform.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -137,5 +131,19 @@ public class BondController {
         var generateCashFlowsCommand = new GenerateCashFlowsByBondIdCommand(bondId);
         bondCommandService.handle(generateCashFlowsCommand);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("{bondId}/holders")
+    @Operation(summary = "Get bond holders by bond ID", description = "Retrieve all bond holders for a specific bond by its ID")
+    public ResponseEntity<List<BondHolderResource>> getBondHoldersByBondId(@PathVariable Long bondId) {
+        var bond = bondQueryService.handle(new GetBondByIdQuery(bondId));
+        if (bond.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        var bondHolders = bondQueryService.handle(new GetBondHoldersByBondIdQuery(bondId));
+        var bondHolderResources = bondHolders.stream()
+                .map(BondHolderResourceFromEntityAssembler::toResourceFromEntity)
+                .toList();
+        return ResponseEntity.ok(bondHolderResources);
     }
 }

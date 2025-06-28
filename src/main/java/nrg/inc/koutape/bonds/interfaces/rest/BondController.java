@@ -146,4 +146,21 @@ public class BondController {
                 .toList();
         return ResponseEntity.ok(bondHolderResources);
     }
+
+    @PutMapping("/{bondId}")
+    @Operation(summary = "Update bond", description = "Update a bond by its ID")
+    public ResponseEntity<BondResource> updateBond(
+            @PathVariable Long bondId,
+            @RequestBody UpdateBondResource updateBondResource) {
+        var updateBondCommand = UpdateBondCommandFromResourceAssembler.toCommandFromResource(updateBondResource, bondId);
+        bondCommandService.handle(updateBondCommand);
+        var updatedBond = bondQueryService.handle(new GetBondByIdQuery(bondId));
+        if (updatedBond.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        var generateCashFlowsCommand = new GenerateCashFlowsByBondIdCommand(updatedBond.get().getId());
+        bondCommandService.handle(generateCashFlowsCommand);
+        var bondResource = BondResourceFromEntityAssembler.toResourceFromEntity(updatedBond.get());
+        return ResponseEntity.ok(bondResource);
+    }
 }

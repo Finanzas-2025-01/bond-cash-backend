@@ -1,10 +1,7 @@
 package nrg.inc.koutape.bonds.application.internal.commandservices;
 
 import nrg.inc.koutape.bonds.domain.model.aggregates.Bond;
-import nrg.inc.koutape.bonds.domain.model.commands.CreateBondCommand;
-import nrg.inc.koutape.bonds.domain.model.commands.GenerateCashFlowsByBondIdCommand;
-import nrg.inc.koutape.bonds.domain.model.commands.HireBondCommand;
-import nrg.inc.koutape.bonds.domain.model.commands.UpdateGracePeriodByPeriodNumberAndBondIdCommand;
+import nrg.inc.koutape.bonds.domain.model.commands.*;
 import nrg.inc.koutape.bonds.domain.services.BondCommandService;
 import nrg.inc.koutape.bonds.infrastructure.persistence.jpa.repositories.*;
 import org.springframework.stereotype.Service;
@@ -111,6 +108,21 @@ public class BondCommandServiceImpl implements BondCommandService {
             this.cashFlowGracePeriodRepository.save(updatedGracePeriod);
         } catch (Exception e) {
             throw new RuntimeException("Failed to update grace period: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void handle(UpdateBondCommand command) {
+        var bond = this.bondRepository.findById(command.bondId());
+        if (bond.isEmpty()) {
+            throw new IllegalArgumentException("Bond with id " + command.bondId() + " does not exist");
+        }
+        var updatedBond = bond.get();
+        updatedBond.updateBond(command);
+        try {
+            this.bondRepository.save(updatedBond);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to update bond: " + e.getMessage(), e);
         }
     }
 }

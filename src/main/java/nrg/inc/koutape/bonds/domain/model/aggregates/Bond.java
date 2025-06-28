@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import nrg.inc.koutape.bonds.domain.model.commands.CreateBondCommand;
+import nrg.inc.koutape.bonds.domain.model.commands.UpdateBondCommand;
 import nrg.inc.koutape.bonds.domain.model.entities.CashFlowGracePeriod;
 import nrg.inc.koutape.bonds.domain.model.valueobjects.Capitalization;
 import nrg.inc.koutape.bonds.domain.model.valueobjects.CuponFrequency;
@@ -99,6 +100,17 @@ public class Bond extends AuditableAbstractAggregateRoot<Bond> {
         this.floatingRatePercentage = command.floatingRatePercentage();
         this.CAVALIPercentage = command.CAVALIPercentage();
         this.anualInflationPercentage = command.anualInflationPercentage();
+    }
+
+    public void updateBond(UpdateBondCommand command) {
+        if (command.comercialValue() != null && command.comercialValue() != 0) this.comercialValue = command.comercialValue();
+        if (command.interestRatePercentage() != null && command.interestRatePercentage() != 0) this.interestRatePercentage = command.interestRatePercentage();
+        if (command.anualDiscountRatePercentage() != null && command.anualDiscountRatePercentage() != 0) this.anualDiscountRatePercentage = command.anualDiscountRatePercentage();
+        if (command.premiumPercentage() != null && command.premiumPercentage() != 0) this.premiumPercentage = command.premiumPercentage();
+        if (command.structuringPercentage() != null && command.structuringPercentage() != 0) this.structuringPercentage = command.structuringPercentage();
+        if (command.placementPercentage() != null && command.placementPercentage() != 0) this.placementPercentage = command.placementPercentage();
+        if (command.floatingRatePercentage() != null && command.floatingRatePercentage() != 0) this.floatingRatePercentage = command.floatingRatePercentage();
+        if (command.CAVALIPercentage() != null && command.CAVALIPercentage() != 0) this.CAVALIPercentage = command.CAVALIPercentage();
     }
 
     public void generateCashFlowGracePeriods() {

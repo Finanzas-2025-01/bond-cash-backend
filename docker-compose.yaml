@@ -1,0 +1,30 @@
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: postgres-db
+    environment:
+      POSTGRES_DB: kouta_pe_db
+      POSTGRES_USER: kouta_user
+      POSTGRES_PASSWORD: 1234
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  app:
+    build: .
+    container_name: kouta-pe-app
+    depends_on:
+      - db
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_URL: jdbc:postgresql://db:5432/kouta_pe_db
+      DATABASE_USERNAME: kouta_user
+      DATABASE_PASSWORD: 1234
+    restart: unless-stopped
+
+volumes:
+  postgres-data:

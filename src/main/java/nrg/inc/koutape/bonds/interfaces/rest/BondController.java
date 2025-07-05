@@ -2,6 +2,7 @@ package nrg.inc.koutape.bonds.interfaces.rest;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import nrg.inc.koutape.bonds.domain.model.commands.GenerateBondResultByBondIdCommand;
 import nrg.inc.koutape.bonds.domain.model.commands.GenerateCashFlowsByBondIdCommand;
 import nrg.inc.koutape.bonds.domain.model.commands.HireBondCommand;
 import nrg.inc.koutape.bonds.domain.model.commands.UpdateGracePeriodByPeriodNumberAndBondIdCommand;
@@ -51,6 +52,9 @@ public class BondController {
         var generateCashFlowsCommand = new GenerateCashFlowsByBondIdCommand(bond.get().getId());
         bondCommandService.handle(generateCashFlowsCommand);
 
+        var generateBondResultCommand = new GenerateBondResultByBondIdCommand(bond.get().getId());
+        bondCommandService.handle(generateBondResultCommand);
+
         if (bond.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
@@ -72,6 +76,8 @@ public class BondController {
         var bond = bondCommandService.handle(hireBondCommand);
         var generateCashFlowsCommand = new GenerateCashFlowsByBondIdCommand(bond.get().getId());
         bondCommandService.handle(generateCashFlowsCommand);
+        var generateBondResultCommand = new GenerateBondResultByBondIdCommand(bond.get().getId());
+        bondCommandService.handle(generateBondResultCommand);
         if (bond.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
@@ -132,6 +138,8 @@ public class BondController {
         bondCommandService.handle(command);
         var generateCashFlowsCommand = new GenerateCashFlowsByBondIdCommand(bondId);
         bondCommandService.handle(generateCashFlowsCommand);
+        var generateBondResultCommand = new GenerateBondResultByBondIdCommand(bondId);
+        bondCommandService.handle(generateBondResultCommand);
         return ResponseEntity.noContent().build();
     }
 
@@ -164,7 +172,10 @@ public class BondController {
         }
         var generateCashFlowsCommand = new GenerateCashFlowsByBondIdCommand(updatedBond.get().getId());
         bondCommandService.handle(generateCashFlowsCommand);
+        var generateBondResultCommand = new GenerateBondResultByBondIdCommand(updatedBond.get().getId());
+        bondCommandService.handle(generateBondResultCommand);
         var bondResource = BondResourceFromEntityAssembler.toResourceFromEntity(updatedBond.get());
         return ResponseEntity.ok(bondResource);
     }
+
 }

@@ -356,7 +356,7 @@ public class Bond extends AuditableAbstractAggregateRoot<Bond> {
         }
     }
 
-    void calculateResult(){
+    public void calculateResult(){
         if (this.bondResult == null) {
             this.bondResult = new BondResult();
         }

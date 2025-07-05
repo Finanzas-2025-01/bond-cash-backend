@@ -3,7 +3,9 @@ package nrg.inc.koutape.bonds.application.internal.queryservices;
 import nrg.inc.koutape.bonds.domain.model.aggregates.Bond;
 import nrg.inc.koutape.bonds.domain.model.aggregates.Issuer;
 import nrg.inc.koutape.bonds.domain.model.queries.GetAllBondsByIssuerIdQuery;
+import nrg.inc.koutape.bonds.domain.model.queries.GetAllHiredBondsByIssuerIdQuery;
 import nrg.inc.koutape.bonds.domain.model.queries.GetIssuerByUsernameQuery;
+import nrg.inc.koutape.bonds.domain.model.valueobjects.BondType;
 import nrg.inc.koutape.bonds.domain.services.IssuerQueryService;
 import nrg.inc.koutape.bonds.infrastructure.persistence.jpa.repositories.IssuerRepository;
 import nrg.inc.koutape.iam.domain.model.queries.GetUserByUsernameQuery;
@@ -43,6 +45,19 @@ public class IssuerQueryServiceImpl implements IssuerQueryService {
     public List<Bond> handle(GetAllBondsByIssuerIdQuery query) {
         var issuer = issuerRepository.findById(query.issuerId());
         if (issuer.isPresent()) {
+            var bonds = issuer.get().getBonds();
+            bonds.removeIf(bond -> bond.getBondType() != BondType.BASE);
+            return issuer.get().getBonds();
+        }
+        return List.of();
+    }
+
+    @Override
+    public List<Bond> handle(GetAllHiredBondsByIssuerIdQuery query) {
+        var issuer = issuerRepository.findById(query.issuerId());
+        if (issuer.isPresent()) {
+            var bonds = issuer.get().getBonds();
+            bonds.removeIf(bond -> bond.getBondType() != BondType.HIRED);
             return issuer.get().getBonds();
         }
         return List.of();

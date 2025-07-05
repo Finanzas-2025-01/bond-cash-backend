@@ -11,6 +11,7 @@ import nrg.inc.koutape.bonds.domain.services.BondQueryService;
 import nrg.inc.koutape.bonds.infrastructure.persistence.jpa.repositories.BondRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,7 +36,11 @@ public class BondQueryServiceImpl implements BondQueryService {
     @Override
     public List<CashFlow> handle(GetCashFlowsByBondIdQuery query) {
         var bond = this.bondRepository.findById(query.bondId());
-        return bond.get().getCashFlows();
+        var cashFlows = bond.get().getCashFlows()
+                .stream()
+                .sorted(Comparator.comparing(CashFlow::getPeriodNumber))
+                .toList();
+        return cashFlows;
     }
 
     @Override

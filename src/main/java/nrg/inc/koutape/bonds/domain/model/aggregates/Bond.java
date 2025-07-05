@@ -10,6 +10,8 @@ import nrg.inc.koutape.bonds.domain.model.entities.CashFlowGracePeriod;
 import nrg.inc.koutape.bonds.domain.model.valueobjects.*;
 import nrg.inc.koutape.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -353,4 +355,119 @@ public class Bond extends AuditableAbstractAggregateRoot<Bond> {
             cashFlows.add(cashFlow);
         }
     }
+
+    void calculateResult(){
+        if (this.bondResult == null) {
+            this.bondResult = new BondResult();
+        }
+        var bondResult = new BondResult();
+        bondResult.setBond(this);
+
+        Double totalUpdateFlow = 0.0;
+        Double totalFAxPeriod = 0.0;
+        Double totalPFactor = 0.0;
+        Double[] issuerFlows = new Double[this.cashFlows.size()];
+        Date[] dates = new Date[this.cashFlows.size()];
+        Double[] bondHolderFlows = new Double[this.cashFlows.size()];
+        var index = 0;
+        for (CashFlow cashFlow : this.cashFlows) {
+            totalUpdateFlow += cashFlow.getUpdatedFlow();
+            totalFAxPeriod += cashFlow.getFAxPeriod();
+            totalPFactor += cashFlow.getPFactor();
+            issuerFlows[index] = cashFlow.getIssuerFlow();
+            dates[index] = cashFlow.getAssignedDate();
+            bondHolderFlows[index] = cashFlow.getBondHolderFlow();
+            index++;
+        }
+
+        var cuponFrequencyValue = 0;
+        switch (this.cuponFrequency) {
+            case MONTHLY -> cuponFrequencyValue = 30;
+            case BIMONTHLY -> cuponFrequencyValue = 60;
+            case TRIMESTRAL -> cuponFrequencyValue = 90;
+            case QUADRIMONTHLY -> cuponFrequencyValue = 120;
+            case SEMIANNUAL -> cuponFrequencyValue = 180;
+            case ANNUAL -> cuponFrequencyValue = 360;
+        }
+        var periodCOK = (Math.pow((1+this.anualDiscountRatePercentage/100), (double)cuponFrequencyValue/this.daysPerYear)) - 1;
+
+        //Calculate Duration
+        var duration = totalFAxPeriod / totalUpdateFlow;
+        bondResult.setDuration(duration);
+
+        var convexity = (totalPFactor/(Math.pow((1+periodCOK),2)*totalUpdateFlow*(Math.pow((this.daysPerYear/cuponFrequencyValue),2))));
+        bondResult.setConvexity(convexity);
+
+        var modifiedDuration = duration / (1 + periodCOK);
+        bondResult.setModifiedDuration(modifiedDuration);
+
+
+        var percentageTCEA = xirr(issuerFlows, dates, null) * 100; // Convertir a porcentaje
+        bondResult.setPercentageTCEA(percentageTCEA);
+
+        var percentageTREA = xirr(bondHolderFlows, dates, null) * 100; // Convertir a porcentaje
+        bondResult.setPercentageTREA(percentageTREA);
+    }
+
+    public Double xirr(Double[] cashFlows, Date[] dates, Double guess) {
+        if (cashFlows == null || dates == null || cashFlows.length != dates.length) {
+            throw new IllegalArgumentException("Los arrays deben ser no nulos y de la misma longitud.");
+        }
+
+        if (guess == null) {
+            guess = 0.1;
+        }
+
+        // Validar existencia de flujos positivos y negativos
+        boolean hasPositive = false, hasNegative = false;
+        for (Double cf : cashFlows) {
+            if (cf == null) continue;
+            if (cf > 0) hasPositive = true;
+            if (cf < 0) hasNegative = true;
+        }
+        if (!(hasPositive && hasNegative)) {
+            return Double.NaN;
+        }
+
+        double tol = 1e-6;
+        int maxIter = 1000;
+        double x0 = guess;
+        double x1;
+        Date t0 = dates[0];
+
+        for (int iter = 0; iter < maxIter; iter++) {
+            double f = 0.0;
+            double fPrime = 0.0;
+
+            for (int i = 0; i < cashFlows.length; i++) {
+                Double cf = cashFlows[i];
+                Date ti = dates[i];
+                if (cf == null || ti == null) continue;
+
+                long millisDiff = ti.getTime() - t0.getTime();
+                double days = millisDiff / (1000.0 * 60 * 60 * 24);
+                double frac = days / this.daysPerYear;
+
+                double denom = Math.pow(1 + x0, frac);
+                f += cf / denom;
+                fPrime += -frac * cf / (denom * (1 + x0));
+            }
+
+            if (Math.abs(fPrime) < 1e-10) {
+                return Double.NaN;
+            }
+
+            x1 = x0 - f / fPrime;
+
+            if (Math.abs(x1 - x0) < tol) {
+                return x1;
+            }
+
+            x0 = x1;
+        }
+
+        return Double.NaN; // No converge
+    }
 }
+
+

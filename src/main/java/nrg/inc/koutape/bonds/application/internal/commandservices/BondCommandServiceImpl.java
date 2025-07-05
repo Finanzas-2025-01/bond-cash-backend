@@ -55,6 +55,7 @@ public class BondCommandServiceImpl implements BondCommandService {
         System.out.println("[HireBond] Nuevo Bond creado a partir de baseBond: " + bond);
 
         bond.setIssuer(issuer.get());
+        bond.setBondholder(bondHolder.get());
         issuer.get().addBond(bond);
         bondHolder.get().addBond(bond);
         System.out.println("[HireBond] Bond agregado a BondHolder. Bonds actuales: " + bondHolder.get().getBonds());

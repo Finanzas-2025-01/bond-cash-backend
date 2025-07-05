@@ -15,5 +15,5 @@ public interface BondQueryService {
     Optional<Bond> handle(GetBondByIdQuery query);
     List<Bond> handle(GetAllBondsQuery query);
     List<CashFlow> handle(GetCashFlowsByBondIdQuery query);
-    List<BondHolder> handle(GetBondHoldersByBondIdQuery query);
+    //List<BondHolder> handle(GetBondHoldersByBondIdQuery query);
 }

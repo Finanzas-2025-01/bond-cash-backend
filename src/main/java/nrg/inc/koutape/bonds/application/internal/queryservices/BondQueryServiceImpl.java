@@ -7,6 +7,7 @@ import nrg.inc.koutape.bonds.domain.model.queries.GetAllBondsQuery;
 import nrg.inc.koutape.bonds.domain.model.queries.GetBondByIdQuery;
 import nrg.inc.koutape.bonds.domain.model.queries.GetBondHoldersByBondIdQuery;
 import nrg.inc.koutape.bonds.domain.model.queries.GetCashFlowsByBondIdQuery;
+import nrg.inc.koutape.bonds.domain.model.valueobjects.BondType;
 import nrg.inc.koutape.bonds.domain.services.BondQueryService;
 import nrg.inc.koutape.bonds.infrastructure.persistence.jpa.repositories.BondRepository;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,9 @@ public class BondQueryServiceImpl implements BondQueryService {
 
     @Override
     public List<Bond> handle(GetAllBondsQuery query) {
-        return this.bondRepository.findAll();
+        var bonds = this.bondRepository.findAll();
+        bonds.removeIf(bond -> bond.getBondType() != BondType.BASE);
+        return bonds;
     }
 
     @Override
@@ -43,9 +46,11 @@ public class BondQueryServiceImpl implements BondQueryService {
         return cashFlows;
     }
 
+    /*
     @Override
     public List<BondHolder> handle(GetBondHoldersByBondIdQuery query) {
         var bond = this.bondRepository.findById(query.bondId());
         return bond.get().getBondholders();
     }
+    */
 }

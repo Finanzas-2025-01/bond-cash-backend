@@ -1,15 +1,13 @@
 package nrg.inc.koutape.bonds.domain.model.aggregates;
 
+import io.micrometer.common.lang.Nullable;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import nrg.inc.koutape.bonds.domain.model.commands.CreateBondCommand;
 import nrg.inc.koutape.bonds.domain.model.commands.UpdateBondCommand;
 import nrg.inc.koutape.bonds.domain.model.entities.CashFlowGracePeriod;
-import nrg.inc.koutape.bonds.domain.model.valueobjects.Capitalization;
-import nrg.inc.koutape.bonds.domain.model.valueobjects.CuponFrequency;
-import nrg.inc.koutape.bonds.domain.model.valueobjects.GracePeriod;
-import nrg.inc.koutape.bonds.domain.model.valueobjects.InterestRateType;
+import nrg.inc.koutape.bonds.domain.model.valueobjects.*;
 import nrg.inc.koutape.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 
 import java.util.ArrayList;
@@ -26,8 +24,10 @@ public class Bond extends AuditableAbstractAggregateRoot<Bond> {
     @JoinColumn(name = "issuer_id")
     private Issuer issuer;
 
-    @ManyToMany(mappedBy = "bonds")
-    private List<BondHolder> bondholders;
+    @ManyToOne
+    @Nullable
+    @JoinColumn(name = "bondholder_id")
+    private BondHolder bondholder;
 
     private String name;
 
@@ -77,9 +77,45 @@ public class Bond extends AuditableAbstractAggregateRoot<Bond> {
     @OneToMany(mappedBy = "bond", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CashFlowGracePeriod> cashFlowGracePeriods;
 
+    @Enumerated(EnumType.STRING)
+    private BondType bondType;
+
     public Bond() {
         // Default constructor
     }
+
+    public Bond(Bond baseBond){
+        this.name = baseBond.name;
+        this.nominalValue = baseBond.nominalValue;
+        this.comercialValue = baseBond.comercialValue;
+        this.years = baseBond.years;
+        this.cuponFrequency = baseBond.cuponFrequency;
+        this.daysPerYear = baseBond.daysPerYear;
+        this.interestRateType = baseBond.interestRateType;
+        this.capitalization = baseBond.capitalization;
+        this.interestRatePercentage = baseBond.interestRatePercentage;
+        this.anualDiscountRatePercentage = baseBond.anualDiscountRatePercentage;
+        this.incomeTaxPercentage = baseBond.incomeTaxPercentage;
+        this.issueDate = new Date();
+        this.premiumPercentage = baseBond.premiumPercentage;
+        this.structuringPercentage = baseBond.structuringPercentage;
+        this.placementPercentage = baseBond.placementPercentage;
+        this.floatingRatePercentage = baseBond.floatingRatePercentage;
+        this.CAVALIPercentage = baseBond.CAVALIPercentage;
+        this.anualInflationPercentage = baseBond.anualInflationPercentage;
+        this.bondType = BondType.HIRED;
+        this.cashFlowGracePeriods = new ArrayList<>();
+        if (baseBond.cashFlowGracePeriods != null) {
+            for (CashFlowGracePeriod gp : baseBond.cashFlowGracePeriods) {
+                CashFlowGracePeriod newGp = new CashFlowGracePeriod();
+                newGp.setBond(this); // Importante: asignar el nuevo bond
+                newGp.setPeriodNumber(gp.getPeriodNumber());
+                newGp.setGracePeriod(gp.getGracePeriod());
+                this.cashFlowGracePeriods.add(newGp);
+            }
+        }
+    }
+
 
     public Bond(CreateBondCommand command) {
         this.name = command.name();
@@ -93,13 +129,19 @@ public class Bond extends AuditableAbstractAggregateRoot<Bond> {
         this.interestRatePercentage = command.interestRatePercentage();
         this.anualDiscountRatePercentage = command.anualDiscountRatePercentage();
         this.incomeTaxPercentage = command.incomeTaxPercentage();
-        this.issueDate = command.issueDate();
+        if(command.issueDate() != null) {
+            this.issueDate = command.issueDate();
+        } else {
+            // If no issue date is provided, set it to the current date
+            this.issueDate = new Date();
+        }
         this.premiumPercentage = command.premiumPercentage();
         this.structuringPercentage = command.structuringPercentage();
         this.placementPercentage = command.placementPercentage();
         this.floatingRatePercentage = command.floatingRatePercentage();
         this.CAVALIPercentage = command.CAVALIPercentage();
         this.anualInflationPercentage = command.anualInflationPercentage();
+        this.bondType = BondType.BASE;
     }
 
     public void updateBond(UpdateBondCommand command) {

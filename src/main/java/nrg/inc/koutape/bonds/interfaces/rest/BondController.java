@@ -59,7 +59,7 @@ public class BondController {
         return new ResponseEntity<>(bondResource, HttpStatus.CREATED);
     }
 
-    @PutMapping(value = "/{bondId}/hire")
+    @PostMapping(value = "/{bondId}/hire")
     @Operation(summary = "Hire a bond", description = "Hire a bond by bondId and bondHolderId")
     public ResponseEntity<HiredBondResource> hireBond(@PathVariable Long bondId, @AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
@@ -70,6 +70,8 @@ public class BondController {
         var bondHolderId = bondHolder.get().getId();
         var hireBondCommand = new HireBondCommand(bondId, bondHolderId);
         var bond = bondCommandService.handle(hireBondCommand);
+        var generateCashFlowsCommand = new GenerateCashFlowsByBondIdCommand(bond.get().getId());
+        bondCommandService.handle(generateCashFlowsCommand);
         if (bond.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
@@ -133,6 +135,7 @@ public class BondController {
         return ResponseEntity.noContent().build();
     }
 
+    /*
     @GetMapping("{bondId}/holders")
     @Operation(summary = "Get bond holders by bond ID", description = "Retrieve all bond holders for a specific bond by its ID")
     public ResponseEntity<List<BondHolderResource>> getBondHoldersByBondId(@PathVariable Long bondId) {
@@ -146,6 +149,7 @@ public class BondController {
                 .toList();
         return ResponseEntity.ok(bondHolderResources);
     }
+    */
 
     @PutMapping("/{bondId}")
     @Operation(summary = "Update bond", description = "Update a bond by its ID")

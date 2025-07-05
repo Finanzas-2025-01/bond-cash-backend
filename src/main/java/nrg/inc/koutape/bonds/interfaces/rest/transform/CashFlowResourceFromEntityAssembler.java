@@ -10,6 +10,7 @@ import java.util.Date;
 public class CashFlowResourceFromEntityAssembler {
     public static CashFlowResource toResourceFromEntity(CashFlow cashFlow) {
         return new CashFlowResource(
+                cashFlow.getBond().getId(),
                 cashFlow.getPeriodNumber(),
                 cashFlow.getAssignedDate(),
                 cashFlow.getAnualInflation(),

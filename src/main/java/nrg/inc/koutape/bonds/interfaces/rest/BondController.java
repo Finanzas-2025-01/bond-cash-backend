@@ -60,7 +60,7 @@ public class BondController {
     }
 
     @PostMapping(value = "/{bondId}/hire")
-    @Operation(summary = "Hire a bond", description = "Hire a bond by bondId and bondHolderId")
+    @Operation(summary = "Hire a bond", description = "Hire a bond by bondId, and authenticated bond holder")
     public ResponseEntity<HiredBondResource> hireBond(@PathVariable Long bondId, @AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
         var bondHolder = bondHolderQueryService.handle(new GetBondHolderByUsernameQuery(username));
@@ -92,7 +92,7 @@ public class BondController {
     }
 
     @GetMapping
-    @Operation(summary = "Get all bonds", description = "Retrieve all bonds")
+    @Operation(summary = "Get all bonds", description = "Retrieve all base bonds")
     public ResponseEntity<List<BondResource>> getAllBonds() {
         var bonds = bondQueryService.handle(new GetAllBondsQuery());
         var bondResources = bonds.stream()
@@ -123,7 +123,7 @@ public class BondController {
     }
 
     @PatchMapping(value = "/{bondId}/cashFlows/{periodNumber}/gracePeriod")
-    @Operation(summary = "Update grace period by period number and bond ID", description = "Update the grace period for a specific cash flow period of a bond")
+    @Operation(summary = "Update grace period by period number and bond ID", description = "Update the grace period for a specific cash flow period of a bond, it can only update base bonds")
     public ResponseEntity<Void> updateGracePeriodByPeriodNumberAndBondId(
             @PathVariable Long bondId,
             @PathVariable Integer periodNumber,

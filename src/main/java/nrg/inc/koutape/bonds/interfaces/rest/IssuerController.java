@@ -31,7 +31,7 @@ public class IssuerController {
     }
 
     @GetMapping(value = "/bonds")
-    @Operation(summary = "Get all bonds issued by the issuer", description = "Retrieve all bonds issued by the issuer")
+    @Operation(summary = "Get all bonds issued by the issuer", description = "Retrieve all base bonds issued by the issuer")
     public ResponseEntity<List<BondResource>> getAllBondsByIssuer(@AuthenticationPrincipal UserDetails userDetails) {
         String issuerUsername = userDetails.getUsername();
         var issuer = issuerQueryService.handle(new GetIssuerByUsernameQuery(issuerUsername));
@@ -47,7 +47,7 @@ public class IssuerController {
     }
 
     @GetMapping(value = "/bonds/hired")
-    @Operation(summary = "Get all bonds issued by the issuer", description = "Retrieve all bonds issued by the issuer")
+    @Operation(summary = "Get all bonds issued by the issuer", description = "Retrieve all hired bonds issued by the issuer")
     public ResponseEntity<List<HiredBondResource>> getAllHiredBondsByIssuer(@AuthenticationPrincipal UserDetails userDetails) {
         String issuerUsername = userDetails.getUsername();
         var issuer = issuerQueryService.handle(new GetIssuerByUsernameQuery(issuerUsername));

@@ -2,6 +2,7 @@ package nrg.inc.koutape.bonds.application.internal.commandservices;
 
 import nrg.inc.koutape.bonds.domain.model.aggregates.Bond;
 import nrg.inc.koutape.bonds.domain.model.commands.*;
+import nrg.inc.koutape.bonds.domain.model.valueobjects.BondType;
 import nrg.inc.koutape.bonds.domain.services.BondCommandService;
 import nrg.inc.koutape.bonds.infrastructure.persistence.jpa.repositories.*;
 import org.springframework.stereotype.Service;
@@ -136,6 +137,10 @@ public class BondCommandServiceImpl implements BondCommandService {
         var bond = this.bondRepository.findById(command.bondId());
         if (bond.isEmpty()) {
             throw new IllegalArgumentException("Bond with id " + command.bondId() + " does not exist");
+        }
+
+        if(bond.get().getBondType() != BondType.BASE){
+            throw new IllegalArgumentException("Bond with id " + command.bondId() + " is not a base bond and cannot have its grace period updated");
         }
 
         var cashFlowGracePeriod = this.cashFlowGracePeriodRepository.findByBondAndPeriodNumber(bond.get(), command.periodNumber());

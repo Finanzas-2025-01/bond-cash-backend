@@ -3,11 +3,13 @@ package nrg.inc.koutape.bonds.domain.model.aggregates;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import lombok.Getter;
 import lombok.Setter;
 import nrg.inc.koutape.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 
 @Entity
 @Setter
+@Getter
 public class BondResult extends AuditableAbstractAggregateRoot<BondResult> {
 
     @OneToOne

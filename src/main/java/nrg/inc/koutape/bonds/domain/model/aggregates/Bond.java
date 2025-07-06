@@ -377,6 +377,7 @@ public class Bond extends AuditableAbstractAggregateRoot<Bond> {
             issuerFlows[index] = cashFlow.getIssuerFlow();
             dates[index] = cashFlow.getAssignedDate();
             bondHolderFlows[index] = cashFlow.getBondHolderFlow();
+            System.out.println("Cash Flow " + index + ": issuer flow " + cashFlow.getIssuerFlow() + " and bond holder flow: "+ cashFlow.getBondHolderFlow() +" on date " + cashFlow.getAssignedDate());
             index++;
         }
 
@@ -402,11 +403,13 @@ public class Bond extends AuditableAbstractAggregateRoot<Bond> {
         bondResult.setModifiedDuration(modifiedDuration);
 
 
-        var percentageTCEA = xirr(issuerFlows, dates, null) * 100; // Convertir a porcentaje
+        var percentageTCEA = xirr(issuerFlows, dates, null) * 100;// Convertir a porcentaje
         bondResult.setPercentageTCEA(percentageTCEA);
 
         var percentageTREA = xirr(bondHolderFlows, dates, null) * 100; // Convertir a porcentaje
         bondResult.setPercentageTREA(percentageTREA);
+
+        this.bondResult = bondResult;
     }
 
     public Double xirr(Double[] cashFlows, Date[] dates, Double guess) {
@@ -446,7 +449,7 @@ public class Bond extends AuditableAbstractAggregateRoot<Bond> {
 
                 long millisDiff = ti.getTime() - t0.getTime();
                 double days = millisDiff / (1000.0 * 60 * 60 * 24);
-                double frac = days / this.daysPerYear;
+                double frac = days / 365; // Asumiendo 365 días por año se puede ajustar según sea necesario a this.daysPerYear
 
                 double denom = Math.pow(1 + x0, frac);
                 f += cf / denom;

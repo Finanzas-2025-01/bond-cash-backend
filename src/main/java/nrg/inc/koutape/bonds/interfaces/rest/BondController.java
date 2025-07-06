@@ -178,4 +178,14 @@ public class BondController {
         return ResponseEntity.ok(bondResource);
     }
 
+    @GetMapping("/{bondId}/result")
+    @Operation(summary = "Get bond result by bond ID", description = "Retrieve the bond result for a specific bond by its ID")
+    public ResponseEntity<BondResultResource> getBondResultByBondId(@PathVariable Long bondId) {
+        var bondResult = bondQueryService.handle(new GetBondResultByBondIdQuery(bondId));
+        if (bondResult.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        var bondResultResource = BondResultResourceFromEntityAssembler.toResourceFromEntity(bondResult.get());
+        return ResponseEntity.ok(bondResultResource);
+    }
 }

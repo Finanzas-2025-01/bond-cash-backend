@@ -6,6 +6,7 @@ import nrg.inc.koutape.bonds.domain.model.aggregates.CashFlow;
 import nrg.inc.koutape.bonds.domain.model.commands.GenerateBondResultByBondIdCommand;
 import nrg.inc.koutape.bonds.domain.model.queries.GetAllBondsQuery;
 import nrg.inc.koutape.bonds.domain.model.queries.GetBondByIdQuery;
+import nrg.inc.koutape.bonds.domain.model.queries.GetBondResultByBondIdQuery;
 import nrg.inc.koutape.bonds.domain.model.queries.GetCashFlowsByBondIdQuery;
 import nrg.inc.koutape.bonds.domain.model.valueobjects.BondType;
 import nrg.inc.koutape.bonds.domain.services.BondQueryService;
@@ -47,10 +48,9 @@ public class BondQueryServiceImpl implements BondQueryService {
     }
 
     @Override
-    public Optional<BondResult> handle(GenerateBondResultByBondIdCommand query) {
+    public Optional<BondResult> handle(GetBondResultByBondIdQuery query) {
         var bond = this.bondRepository.findById(query.bondId());
-        var bondResult = bond.get().generateResult();
-        return bond.get().getBondResult();
+        return Optional.of(bond.get().getBondResult());
     }
 
     /*

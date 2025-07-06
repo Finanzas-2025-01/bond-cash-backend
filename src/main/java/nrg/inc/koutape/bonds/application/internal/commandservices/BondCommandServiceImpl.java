@@ -160,13 +160,6 @@ public class BondCommandServiceImpl implements BondCommandService {
             throw new IllegalArgumentException("Bond with id " + command.bondId() + " does not exist");
         }
 
-        if( bond.get().getBondResult() != null){
-            var bondResult = this.bondResultRepository.findById(command.bondId());
-            if (bondResult.isPresent()) {
-                this.bondResultRepository.delete(bondResult.get());
-            }
-        }
-
         try {
             bond.get().calculateResult();
             this.bondRepository.save(bond.get());

@@ -357,11 +357,12 @@ public class Bond extends AuditableAbstractAggregateRoot<Bond> {
     }
 
     public void calculateResult(){
-        if (this.bondResult == null) {
-            this.bondResult = new BondResult();
+
+        BondResult bondResult = this.bondResult;
+        if (bondResult == null) {
+            bondResult = new BondResult();
+            bondResult.setBond(this);
         }
-        var bondResult = new BondResult();
-        bondResult.setBond(this);
 
         Double totalUpdateFlow = 0.0;
         Double totalFAxPeriod = 0.0;

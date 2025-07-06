@@ -31,6 +31,7 @@ public class BondResourceFromEntityAssembler {
                 bond.getFloatingRatePercentage(),
                 bond.getCAVALIPercentage(),
                 bond.getAnualInflationPercentage(),
+                bond.getBondType(),
                 IssuerResourceFromEntityAssembler.toResourceFromEntity(bond.getIssuer())
         );
     }

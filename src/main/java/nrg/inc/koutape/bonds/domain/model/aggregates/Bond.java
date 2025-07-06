@@ -127,7 +127,12 @@ public class Bond extends AuditableAbstractAggregateRoot<Bond> {
         this.cuponFrequency = command.cuponFrequency();
         this.daysPerYear = command.daysPerYear();
         this.interestRateType = command.interestRateType();
-        this.capitalization = command.capitalization();
+        if(command.capitalization() == null) {
+            this.capitalization = Capitalization.NONE; // Default value if not provided
+        } else {
+            // Ensure capitalization is set to a valid value
+            this.capitalization = command.capitalization();
+        }
         this.interestRatePercentage = command.interestRatePercentage();
         this.anualDiscountRatePercentage = command.anualDiscountRatePercentage();
         this.incomeTaxPercentage = command.incomeTaxPercentage();

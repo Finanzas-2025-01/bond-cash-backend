@@ -8,6 +8,7 @@ import nrg.inc.koutape.bonds.domain.model.valueobjects.GracePeriod;
 import java.util.Date;
 
 public record CashFlowResource(
+        Long bondId,
         Integer periodNumber,
         Date assignedDate,
         Double anualInflation,

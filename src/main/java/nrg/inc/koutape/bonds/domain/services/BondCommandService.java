@@ -11,4 +11,5 @@ public interface BondCommandService {
     void handle(GenerateCashFlowsByBondIdCommand command);
     void handle(UpdateGracePeriodByPeriodNumberAndBondIdCommand command);
     void handle(UpdateBondCommand command);
+    void handle(GenerateBondResultByBondIdCommand command);
 }

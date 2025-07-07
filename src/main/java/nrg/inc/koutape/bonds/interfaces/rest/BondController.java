@@ -2,6 +2,7 @@ package nrg.inc.koutape.bonds.interfaces.rest;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import nrg.inc.koutape.bonds.domain.model.commands.GenerateBondResultByBondIdCommand;
 import nrg.inc.koutape.bonds.domain.model.commands.GenerateCashFlowsByBondIdCommand;
 import nrg.inc.koutape.bonds.domain.model.commands.HireBondCommand;
 import nrg.inc.koutape.bonds.domain.model.commands.UpdateGracePeriodByPeriodNumberAndBondIdCommand;
@@ -51,6 +52,9 @@ public class BondController {
         var generateCashFlowsCommand = new GenerateCashFlowsByBondIdCommand(bond.get().getId());
         bondCommandService.handle(generateCashFlowsCommand);
 
+        var generateBondResultCommand = new GenerateBondResultByBondIdCommand(bond.get().getId());
+        bondCommandService.handle(generateBondResultCommand);
+
         if (bond.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
@@ -59,8 +63,8 @@ public class BondController {
         return new ResponseEntity<>(bondResource, HttpStatus.CREATED);
     }
 
-    @PutMapping(value = "/{bondId}/hire")
-    @Operation(summary = "Hire a bond", description = "Hire a bond by bondId and bondHolderId")
+    @PostMapping(value = "/{bondId}/hire")
+    @Operation(summary = "Hire a bond", description = "Hire a bond by bondId, and authenticated bond holder")
     public ResponseEntity<HiredBondResource> hireBond(@PathVariable Long bondId, @AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
         var bondHolder = bondHolderQueryService.handle(new GetBondHolderByUsernameQuery(username));
@@ -70,6 +74,10 @@ public class BondController {
         var bondHolderId = bondHolder.get().getId();
         var hireBondCommand = new HireBondCommand(bondId, bondHolderId);
         var bond = bondCommandService.handle(hireBondCommand);
+        var generateCashFlowsCommand = new GenerateCashFlowsByBondIdCommand(bond.get().getId());
+        bondCommandService.handle(generateCashFlowsCommand);
+        var generateBondResultCommand = new GenerateBondResultByBondIdCommand(bond.get().getId());
+        bondCommandService.handle(generateBondResultCommand);
         if (bond.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
@@ -90,7 +98,7 @@ public class BondController {
     }
 
     @GetMapping
-    @Operation(summary = "Get all bonds", description = "Retrieve all bonds")
+    @Operation(summary = "Get all bonds", description = "Retrieve all base bonds")
     public ResponseEntity<List<BondResource>> getAllBonds() {
         var bonds = bondQueryService.handle(new GetAllBondsQuery());
         var bondResources = bonds.stream()
@@ -121,7 +129,7 @@ public class BondController {
     }
 
     @PatchMapping(value = "/{bondId}/cashFlows/{periodNumber}/gracePeriod")
-    @Operation(summary = "Update grace period by period number and bond ID", description = "Update the grace period for a specific cash flow period of a bond")
+    @Operation(summary = "Update grace period by period number and bond ID", description = "Update the grace period for a specific cash flow period of a bond, it can only update base bonds")
     public ResponseEntity<Void> updateGracePeriodByPeriodNumberAndBondId(
             @PathVariable Long bondId,
             @PathVariable Integer periodNumber,
@@ -130,9 +138,12 @@ public class BondController {
         bondCommandService.handle(command);
         var generateCashFlowsCommand = new GenerateCashFlowsByBondIdCommand(bondId);
         bondCommandService.handle(generateCashFlowsCommand);
+        var generateBondResultCommand = new GenerateBondResultByBondIdCommand(bondId);
+        bondCommandService.handle(generateBondResultCommand);
         return ResponseEntity.noContent().build();
     }
 
+    /*
     @GetMapping("{bondId}/holders")
     @Operation(summary = "Get bond holders by bond ID", description = "Retrieve all bond holders for a specific bond by its ID")
     public ResponseEntity<List<BondHolderResource>> getBondHoldersByBondId(@PathVariable Long bondId) {
@@ -146,6 +157,7 @@ public class BondController {
                 .toList();
         return ResponseEntity.ok(bondHolderResources);
     }
+    */
 
     @PutMapping("/{bondId}")
     @Operation(summary = "Update bond", description = "Update a bond by its ID")
@@ -160,7 +172,20 @@ public class BondController {
         }
         var generateCashFlowsCommand = new GenerateCashFlowsByBondIdCommand(updatedBond.get().getId());
         bondCommandService.handle(generateCashFlowsCommand);
+        var generateBondResultCommand = new GenerateBondResultByBondIdCommand(updatedBond.get().getId());
+        bondCommandService.handle(generateBondResultCommand);
         var bondResource = BondResourceFromEntityAssembler.toResourceFromEntity(updatedBond.get());
         return ResponseEntity.ok(bondResource);
+    }
+
+    @GetMapping("/{bondId}/result")
+    @Operation(summary = "Get bond result by bond ID", description = "Retrieve the bond result for a specific bond by its ID")
+    public ResponseEntity<BondResultResource> getBondResultByBondId(@PathVariable Long bondId) {
+        var bondResult = bondQueryService.handle(new GetBondResultByBondIdQuery(bondId));
+        if (bondResult.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        var bondResultResource = BondResultResourceFromEntityAssembler.toResourceFromEntity(bondResult.get());
+        return ResponseEntity.ok(bondResultResource);
     }
 }

@@ -1,5 +1,6 @@
 package nrg.inc.koutape.bonds.interfaces.rest.resources;
 
+import nrg.inc.koutape.bonds.domain.model.valueobjects.BondType;
 import nrg.inc.koutape.bonds.domain.model.valueobjects.Capitalization;
 import nrg.inc.koutape.bonds.domain.model.valueobjects.CuponFrequency;
 import nrg.inc.koutape.bonds.domain.model.valueobjects.InterestRateType;
@@ -26,6 +27,7 @@ public record BondResource(
         Double floatingRatePercentage,
         Double CAVALIPercentage,
         Double anualInflationPercentage,
+        BondType bondType,
         IssuerResource issuer
 ) {
 }

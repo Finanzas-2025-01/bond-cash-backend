@@ -1,16 +1,19 @@
 package nrg.inc.koutape.bonds.application.internal.queryservices;
 
 import nrg.inc.koutape.bonds.domain.model.aggregates.Bond;
-import nrg.inc.koutape.bonds.domain.model.aggregates.BondHolder;
+import nrg.inc.koutape.bonds.domain.model.aggregates.BondResult;
 import nrg.inc.koutape.bonds.domain.model.aggregates.CashFlow;
+import nrg.inc.koutape.bonds.domain.model.commands.GenerateBondResultByBondIdCommand;
 import nrg.inc.koutape.bonds.domain.model.queries.GetAllBondsQuery;
 import nrg.inc.koutape.bonds.domain.model.queries.GetBondByIdQuery;
-import nrg.inc.koutape.bonds.domain.model.queries.GetBondHoldersByBondIdQuery;
+import nrg.inc.koutape.bonds.domain.model.queries.GetBondResultByBondIdQuery;
 import nrg.inc.koutape.bonds.domain.model.queries.GetCashFlowsByBondIdQuery;
+import nrg.inc.koutape.bonds.domain.model.valueobjects.BondType;
 import nrg.inc.koutape.bonds.domain.services.BondQueryService;
 import nrg.inc.koutape.bonds.infrastructure.persistence.jpa.repositories.BondRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,18 +32,32 @@ public class BondQueryServiceImpl implements BondQueryService {
 
     @Override
     public List<Bond> handle(GetAllBondsQuery query) {
-        return this.bondRepository.findAll();
+        var bonds = this.bondRepository.findAll();
+        bonds.removeIf(bond -> bond.getBondType() != BondType.BASE);
+        return bonds;
     }
 
     @Override
     public List<CashFlow> handle(GetCashFlowsByBondIdQuery query) {
         var bond = this.bondRepository.findById(query.bondId());
-        return bond.get().getCashFlows();
+        var cashFlows = bond.get().getCashFlows()
+                .stream()
+                .sorted(Comparator.comparing(CashFlow::getPeriodNumber))
+                .toList();
+        return cashFlows;
     }
 
+    @Override
+    public Optional<BondResult> handle(GetBondResultByBondIdQuery query) {
+        var bond = this.bondRepository.findById(query.bondId());
+        return Optional.of(bond.get().getBondResult());
+    }
+
+    /*
     @Override
     public List<BondHolder> handle(GetBondHoldersByBondIdQuery query) {
         var bond = this.bondRepository.findById(query.bondId());
         return bond.get().getBondholders();
     }
+    */
 }

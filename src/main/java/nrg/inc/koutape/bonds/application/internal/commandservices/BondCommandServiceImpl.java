@@ -2,6 +2,7 @@ package nrg.inc.koutape.bonds.application.internal.commandservices;
 
 import nrg.inc.koutape.bonds.domain.model.aggregates.Bond;
 import nrg.inc.koutape.bonds.domain.model.commands.*;
+import nrg.inc.koutape.bonds.domain.model.valueobjects.BondType;
 import nrg.inc.koutape.bonds.domain.services.BondCommandService;
 import nrg.inc.koutape.bonds.infrastructure.persistence.jpa.repositories.*;
 import org.springframework.stereotype.Service;
@@ -16,31 +17,51 @@ public class BondCommandServiceImpl implements BondCommandService {
     private final IssuerRepository issuerRepository;
     private final CashFlowRepository cashFlowRepository;
     private final CashFlowGracePeriodRepository cashFlowGracePeriodRepository;
+    private final BondResultRepository bondResultRepository;
 
-    public BondCommandServiceImpl(BondHolderRepository bondHolderRepository, BondRepository bondRepository, IssuerRepository issuerRepository, CashFlowRepository cashFlowRepository, CashFlowGracePeriodRepository cashFlowGracePeriodRepository) {
+    public BondCommandServiceImpl(BondHolderRepository bondHolderRepository, BondRepository bondRepository, IssuerRepository issuerRepository, CashFlowRepository cashFlowRepository, CashFlowGracePeriodRepository cashFlowGracePeriodRepository, BondResultRepository bondResultRepository) {
         this.bondHolderRepository = bondHolderRepository;
         this.bondRepository = bondRepository;
         this.issuerRepository = issuerRepository;
         this.cashFlowRepository = cashFlowRepository;
         this.cashFlowGracePeriodRepository = cashFlowGracePeriodRepository;
+        this.bondResultRepository = bondResultRepository;
     }
 
     @Override
     public Optional<Bond> handle(HireBondCommand command) {
+
         var bondHolder = this.bondHolderRepository.findById(command.bondHolderId());
+
         if (bondHolder.isEmpty()) {
             throw new IllegalArgumentException("Bond holder with id " + command.bondHolderId() + " does not exist");
         }
-        var bond = this.bondRepository.findById(command.bondId());
-        if (bond.isEmpty()) {
+
+        var baseBond = this.bondRepository.findById(command.bondId());
+
+        if (baseBond.isEmpty()) {
             throw new IllegalArgumentException("Bond with id " + command.bondId() + " does not exist");
         }
 
-        bondHolder.get().addBond(bond.get());
+        var issuer = this.issuerRepository.findById(baseBond.get().getIssuer().getId());
+        if (issuer.isEmpty()) {
+            throw new IllegalArgumentException("Issuer with id " + baseBond.get().getIssuer().getId() + " does not exist");
+        }
 
-        try{
+        var bond = new Bond(baseBond.get());
+
+        bond.setIssuer(issuer.get());
+        bond.setBondholder(bondHolder.get());
+        issuer.get().addBond(bond);
+        bondHolder.get().addBond(bond);
+        try {
+            this.issuerRepository.save(issuer.get());
+
             this.bondHolderRepository.save(bondHolder.get());
-            return Optional.of(bond.get());
+
+            var hiredBond = bondRepository.save(bond);
+
+            return Optional.of(hiredBond);
         } catch (Exception e) {
             throw new RuntimeException("Failed to hire bond: " + e.getMessage(), e);
         }
@@ -70,6 +91,7 @@ public class BondCommandServiceImpl implements BondCommandService {
     @Override
     public void handle(GenerateCashFlowsByBondIdCommand command) {
         var bond = this.bondRepository.findById(command.bondId());
+
         if (bond.isEmpty()) {
             throw new IllegalArgumentException("Bond with id " + command.bondId() + " does not exist");
         }
@@ -95,6 +117,10 @@ public class BondCommandServiceImpl implements BondCommandService {
         var bond = this.bondRepository.findById(command.bondId());
         if (bond.isEmpty()) {
             throw new IllegalArgumentException("Bond with id " + command.bondId() + " does not exist");
+        }
+
+        if(bond.get().getBondType() != BondType.BASE){
+            throw new IllegalArgumentException("Bond with id " + command.bondId() + " is not a base bond and cannot have its grace period updated");
         }
 
         var cashFlowGracePeriod = this.cashFlowGracePeriodRepository.findByBondAndPeriodNumber(bond.get(), command.periodNumber());
@@ -123,6 +149,22 @@ public class BondCommandServiceImpl implements BondCommandService {
             this.bondRepository.save(updatedBond);
         } catch (Exception e) {
             throw new RuntimeException("Failed to update bond: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void handle(GenerateBondResultByBondIdCommand command) {
+        var bond = this.bondRepository.findById(command.bondId());
+
+        if (bond.isEmpty()) {
+            throw new IllegalArgumentException("Bond with id " + command.bondId() + " does not exist");
+        }
+
+        try {
+            bond.get().calculateResult();
+            this.bondRepository.save(bond.get());
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to generate bond result: " + e.getMessage(), e);
         }
     }
 }
